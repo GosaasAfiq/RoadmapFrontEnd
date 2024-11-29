@@ -1,10 +1,16 @@
-import { Roadmap } from "../../app/models/roadmap";
+import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import { useStore } from "../../app/stores/store";
 
-interface Props {
-    roadmaps: Roadmap[];
-}
+export default observer(function RoadmapDashboard() {
+    const { roadmapStore } = useStore();
+    const { loadRoadmaps, roadmaps } = roadmapStore;
 
-export default function RoadmapDashboard({ roadmaps }: Props) {
+    // Load roadmaps when the component mounts
+    useEffect(() => {
+        loadRoadmaps();
+    }, [loadRoadmaps]);
+
     return (
         <div className="p-6">
             {/* Header Section */}
@@ -21,27 +27,17 @@ export default function RoadmapDashboard({ roadmaps }: Props) {
                         Filter
                     </button>
                 </div>
-
-
             </div>
 
             {/* Icons Section */}
             <div className="flex justify-end items-center space-x-4 mb-6">
                 {/* Icon 1 */}
                 <div className="flex items-center justify-center w-10 h-10 hover:bg-gray-300 transition">
-                    <img
-                        className="w-10 h-10"
-                        src="/img/list.png"
-                        alt="User"
-                    />
+                    <img className="w-10 h-10" src="/img/list.png" alt="User" />
                 </div>
                 {/* Icon 2 */}
                 <div className="flex items-center justify-center w-10 h-10 hover:bg-gray-300 transition">
-                    <img
-                        className="w-10 h-10"
-                        src="/img/table.png"
-                        alt="User"
-                    />
+                    <img className="w-10 h-10" src="/img/table.png" alt="User" />
                 </div>
             </div>
 
@@ -70,4 +66,4 @@ export default function RoadmapDashboard({ roadmaps }: Props) {
             </div>
         </div>
     );
-}
+});

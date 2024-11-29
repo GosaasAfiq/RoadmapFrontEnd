@@ -1,28 +1,30 @@
-import { useEffect, useState } from 'react'
-import NavBar from './Navbar';
-import './style.css';  // Correct relative path to index.css
-import { Outlet } from 'react-router-dom';
-import { Roadmap } from '../models/roadmap';
-import RoadmapDashboard from '../../features/Dashboard/RoadmapDashboard';
-import agent from '../api/agent';
-
+import { useEffect } from "react";
+import { observer } from "mobx-react-lite"; // For observing MobX state changes
+import NavBar from "./Navbar";
+import "./style.css";
+import Login from "../../features/Login/Login";
+import { useStore } from "../stores/store";
+import { Outlet } from "react-router-dom";
 
 function App() {
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
+    const { roadmapStore } = useStore();
 
-  useEffect(() => {
-    agent.Roadmaps.list().then(response => {
-        setRoadmaps(response);
-      })
-  }, [])
+    useEffect(() => {
+        roadmapStore.loadRoadmaps();
+    }, [roadmapStore]);
 
-  return (
-    <div>
-      <NavBar/>
-        <RoadmapDashboard roadmaps={roadmaps}/>
-      <Outlet/>
-    </div>
-  )
+    return (
+        <div>
+          {location.pathname === '/' ? (
+            <Login/>
+          ) : (
+            <>
+              <NavBar />
+              <Outlet />
+            </>
+          )}
+        </div>
+    );
 }
 
-export default App
+export default observer(App); // Wrap with `observer` to react to MobX state changes
