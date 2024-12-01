@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom"; // For navigation after logout
+import { useStore } from "../stores/store";
 
 export default function NavBar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const { userStore } = useStore();
+    const navigate = useNavigate(); // Hook for navigation
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -18,6 +22,12 @@ export default function NavBar() {
         ) {
             setDropdownOpen(false); // Close the dropdown
         }
+    };
+
+    // Handle logout
+    const handleLogout = () => {
+        userStore.logout(); // Clear user session
+        navigate("/"); // Redirect to login page
     };
 
     useEffect(() => {
@@ -89,12 +99,12 @@ export default function NavBar() {
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        href="#"
-                                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                    <button
+                                        onClick={handleLogout} // Log out on click
+                                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     >
                                         Log Out
-                                    </a>
+                                    </button>
                                 </li>
                             </ul>
                         </div>

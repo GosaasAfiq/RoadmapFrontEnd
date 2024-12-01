@@ -2,27 +2,23 @@ import { useEffect } from "react";
 import { observer } from "mobx-react-lite"; // For observing MobX state changes
 import NavBar from "./Navbar";
 import "./style.css";
-import Login from "../../features/Login/Login";
 import { useStore } from "../stores/store";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, } from "react-router-dom";
 
 function App() {
     const { roadmapStore } = useStore();
+    const location = useLocation(); 
 
     useEffect(() => {
         roadmapStore.loadRoadmaps();
     }, [roadmapStore]);
 
+    const showNavBar = location.pathname !== "/"; 
+
     return (
         <div>
-          {location.pathname === '/' ? (
-            <Login/>
-          ) : (
-            <>
-              <NavBar />
-              <Outlet />
-            </>
-          )}
+          {showNavBar && <NavBar />} {/* Conditionally render NavBar */}
+          <Outlet /> {/* Render child routes here */}
         </div>
     );
 }
