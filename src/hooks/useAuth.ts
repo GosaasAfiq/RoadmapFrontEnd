@@ -4,11 +4,13 @@ import { useStore } from "../app/stores/store";
 export const useAuth = () => {
     const { userStore } = useStore();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
-        // Check for user data in localStorage on mount
+        // Load user from localStorage when the app starts
         userStore.loadUserFromLocalStorage();
         setIsAuthenticated(!!userStore.user);
+        setLoading(false); // Set loading to false after user data is loaded
     }, [userStore]);
 
     const login = (user: any) => {
@@ -26,5 +28,6 @@ export const useAuth = () => {
         user: userStore.user,
         login,
         logout,
+        loading, // Return loading state
     };
 };

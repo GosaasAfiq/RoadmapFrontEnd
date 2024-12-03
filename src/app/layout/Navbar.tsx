@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom"; // For navigation after logout
 import { useStore } from "../stores/store";
+import { useAuth } from "../../hooks/useAuth";
+import { observer } from "mobx-react-lite";
 
-export default function NavBar() {
+export default observer(function NavBar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { userStore } = useStore();
     const navigate = useNavigate(); // Hook for navigation
+    const { user, loading } = useAuth(); // Destructure loading and user from useAuth
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -40,6 +43,9 @@ export default function NavBar() {
         };
     }, []);
 
+    // If the user data is loading, you might want to return null or a loading spinner
+    if (loading) return null; // Or display a loading spinner if needed
+
     return (
         <nav className="bg-blue-600 shadow-lg">
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
@@ -73,9 +79,10 @@ export default function NavBar() {
                         aria-expanded={dropdownOpen ? "true" : "false"}
                         onClick={toggleDropdown}
                     >
+                        {/* Render the user image or default image */}
                         <img
                             className="w-10 h-10 rounded-full"
-                            src="/img/user.png"
+                            src={user?.image || "/img/user.png"}
                             alt="User"
                         />
                     </button>
@@ -113,4 +120,4 @@ export default function NavBar() {
             </div>
         </nav>
     );
-}
+});

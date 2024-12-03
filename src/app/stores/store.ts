@@ -9,7 +9,7 @@ interface Store {
 
 export const store: Store = {
     roadmapStore: new RoadmapStore(),
-    userStore: new UserStore()
+    userStore: new UserStore(),
 }
 
 export const StoreContext = createContext(store);

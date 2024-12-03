@@ -33,11 +33,14 @@ export default observer(function RoadmapDashboard() {
             <div className="flex justify-end items-center space-x-4 mb-6">
                 {/* Icon 1 */}
                 <div className="flex items-center justify-center w-10 h-10 hover:bg-gray-300 transition">
-                    <img className="w-10 h-10" src="/img/list.png" alt="User" />
+                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>
+                        list
+                    </span>
                 </div>
+
                 {/* Icon 2 */}
                 <div className="flex items-center justify-center w-10 h-10 hover:bg-gray-300 transition">
-                    <img className="w-10 h-10" src="/img/table.png" alt="User" />
+                    <img className="w-10 h-10" src="/img/table1.png" alt="User" />
                 </div>
             </div>
 

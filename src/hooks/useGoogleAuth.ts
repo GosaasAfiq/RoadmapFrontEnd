@@ -12,12 +12,14 @@ export const useGoogleAuth = () => {
             console.log("Google Credential Token:", token);
 
             // Send token to backend for validation
-            const response = await fetch(`http://localhost:5000/api/auth/google-response?credential=${token}`, {
-                method: "GET",
+            const response = await fetch("http://localhost:5000/api/auth/google-response", {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({ credential: token }),
             });
+            
             
             
 
@@ -33,6 +35,7 @@ export const useGoogleAuth = () => {
                 token: data.token,
                 createdAt: data.createdAt,
                 updatedAt: data.updatedAt,
+                image: data.image,
             };
 
             // Save the user and redirect
