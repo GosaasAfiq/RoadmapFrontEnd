@@ -28,6 +28,7 @@ export default class UserStore {
         this.token = null;
         localStorage.removeItem("user");
         localStorage.removeItem("appToken");
+        localStorage.removeItem("view");
     };
 
     // Optionally, load user from localStorage (useful for refreshing the page)

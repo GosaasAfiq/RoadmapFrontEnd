@@ -1,7 +1,9 @@
 import axios,{AxiosResponse}from "axios";
 import { Roadmap } from "../models/roadmap";
+import { store } from "../stores/store";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+
 
 const sleep = (delay: number) => {
     return new Promise((resolve) => {
@@ -10,9 +12,7 @@ const sleep = (delay: number) => {
 }
 
 axios.interceptors.response.use(response => {
-    return sleep(1000).then(() => {
-        console.log("hello");
-        
+    return sleep(1000).then(() => {        
         return response;
     }).catch((error ) => {
         console.log(error);
@@ -20,6 +20,20 @@ axios.interceptors.response.use(response => {
     })
 })
 
+
+axios.interceptors.request.use(
+    (config) => {
+        const {userStore} = store;
+        const {token} = userStore;
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`; // Attach the token to headers
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
