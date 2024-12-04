@@ -12,6 +12,12 @@ export default observer(function RoadmapDashboard() {
     // Get the initial view from localStorage, default to 'table' 
     const initialView = localStorage.getItem('view') || 'list'; 
     const [isListView, setIsListView] = useState(initialView === 'table');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSearch = () => {
+        roadmapStore.loadRoadmaps(searchTerm);
+    };
+
 
     // Load roadmaps when the component mounts
     useEffect(() => {
@@ -33,9 +39,13 @@ export default observer(function RoadmapDashboard() {
                 {/* Search Bar */}
                 <input
                     type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     placeholder="Search"
                     className="border border-gray-300 rounded-md px-4 py-2 w-1/3 focus:outline-none focus:ring focus:ring-blue-300"
                 />
+
                 {/* Filter Dropdown */}
                 <div className="relative">
                     <button className="border border-gray-300 rounded-md px-4 py-2 bg-white shadow-sm w-52 focus:outline-none focus:ring focus:ring-blue-300">

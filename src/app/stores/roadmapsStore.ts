@@ -12,10 +12,10 @@ export default class RoadmapStore {
         makeAutoObservable(this);
     }
  
-    loadRoadmaps = async () => {
+    loadRoadmaps = async (searchTerm?: string) => {
         this.loadingInitial = true;
         try {
-            const roadmaps = await agent.Roadmaps.list();
+            const roadmaps = await agent.Roadmaps.list(searchTerm);
             runInAction(() => {
                 this.roadmaps = roadmaps;
             });

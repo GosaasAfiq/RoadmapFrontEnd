@@ -46,8 +46,12 @@ const requests = {
 }
 
 const Roadmaps = {
-    list: () => requests.get<Roadmap[]>('/roadmaps'),
-}
+    list: (searchTerm?: string) => {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('searchTerm', searchTerm);
+        return requests.get<Roadmap[]>(`/roadmaps?${params.toString()}`);
+    },
+};
  
 const agent = {
     Roadmaps
