@@ -46,12 +46,14 @@ const requests = {
 }
 
 const Roadmaps = {
-    list: (searchTerm?: string) => {
+    list: (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' = 'all') => {
         const params = new URLSearchParams();
         if (searchTerm) params.append('searchTerm', searchTerm);
+        if (filter !== 'all') params.append('filter', filter); // Add the filter parameter if it's not 'all'
         return requests.get<Roadmap[]>(`/roadmaps?${params.toString()}`);
-    },
+    },    
 };
+
  
 const agent = {
     Roadmaps
