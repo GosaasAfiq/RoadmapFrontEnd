@@ -3,10 +3,11 @@ import { useEffect, useState } from "react";
 import { useStore } from "../../app/stores/store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faList, faTable } from "@fortawesome/free-solid-svg-icons";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
-export default observer(function RoadmapDashboard() {
+export default observer(function RoadmapDashboard() { 
     const { roadmapStore } = useStore();
-    const { loadRoadmaps, roadmaps } = roadmapStore;
+    const { loadRoadmaps, roadmaps,loadingInitial } = roadmapStore;
 
     // Get the initial view from localStorage, default to 'table' 
     const initialView = localStorage.getItem('view') || 'list'; 
@@ -22,6 +23,8 @@ export default observer(function RoadmapDashboard() {
         setIsListView(view === 'table');
         localStorage.setItem('view', view); // Save to localStorage
     };
+
+    if (loadingInitial) return <LoadingComponent content="Loading..." />
 
     return (
         <div className="p-6">

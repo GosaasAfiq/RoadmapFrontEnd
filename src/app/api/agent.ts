@@ -12,7 +12,7 @@ const sleep = (delay: number) => {
 }
 
 axios.interceptors.response.use(response => {
-    return sleep(1000).then(() => {        
+    return sleep(3000).then(() => {        
         return response;
     }).catch((error ) => {
         console.log(error);
