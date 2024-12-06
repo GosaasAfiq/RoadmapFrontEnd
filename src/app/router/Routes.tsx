@@ -2,6 +2,8 @@ import { createBrowserRouter, RouteObject } from "react-router-dom";
 import App from "../layout/App";
 import Login from "../../features/Login/Login";
 import RoadmapDashboard from "../../features/Dashboard/RoadmapDashboard";
+import CreateRoadmap from "../../features/Create/CreateRoadmap";
+import AuditTrail from "../../features/AuditTrail/AuditTrail";
 
 
 export const routes: RouteObject[] = [
@@ -11,6 +13,8 @@ export const routes: RouteObject[] = [
         children:[
             {path: '', element:<Login/>},
             {path: 'roadmaps', element:<RoadmapDashboard/>},
+            {path: 'create', element:<CreateRoadmap/>},
+            {path: 'audittrail', element:<AuditTrail/>},
         ]
     },
 ]

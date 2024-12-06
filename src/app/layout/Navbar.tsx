@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation after logout
+import { NavLink, useNavigate } from "react-router-dom"; // For navigation after logout
 import { useStore } from "../stores/store";
 import { useAuth } from "../../hooks/useAuth";
 import { observer } from "mobx-react-lite";
@@ -63,10 +63,10 @@ export default observer(function NavBar() {
                 {/* Center: Create and View Roadmaps */}
                 <div className="flex items-center space-x-4 ml-auto mr-8">
                     <button className="bg-white text-blue-600 font-semibold py-2 px-4 rounded hover:bg-blue-100 transition">
-                        Create
+                        <NavLink to="create" className="block">Create Roadmap</NavLink>
                     </button>
                     <button className="bg-white text-blue-600 font-semibold py-2 px-4 rounded hover:bg-blue-100 transition">
-                        View Roadmaps
+                        <NavLink to="roadmaps" className="block">View Roadmaps</NavLink>
                     </button>
                 </div>
 
@@ -84,7 +84,7 @@ export default observer(function NavBar() {
                             className="w-10 h-10 rounded-full"
                             src={user?.image || "/img/user.png"}
                             alt="User"
-                        />
+                        /> 
                     </button>
 
                     {/* Dropdown Menu */}
@@ -102,7 +102,7 @@ export default observer(function NavBar() {
                                         href="#"
                                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     >
-                                        Audit Trails
+                                        <NavLink to="audittrail" className="block">Audit Trail</NavLink>
                                     </a>
                                 </li>
                                 <li>

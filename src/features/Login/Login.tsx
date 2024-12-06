@@ -15,8 +15,8 @@ export default observer(function Login() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 relative">
-            <h1 className="absolute top-4 left-4 right-1 bottom-1 text-4xl font-extrabold text-gray-800 tracking-wide">
-                Sign In
+            <h1 className="absolute top-8 text-5xl font-bold text-gray-800">
+                Login / Roadmaps
             </h1>
             <div className="bg-white w-1/2 h-[60vh] p-16 rounded-lg shadow-lg flex flex-col items-center justify-center relative">
                 <img
