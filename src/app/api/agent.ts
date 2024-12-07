@@ -1,6 +1,7 @@
 import axios,{AxiosResponse}from "axios";
 import { Roadmap } from "../models/roadmap";
 import { store } from "../stores/store";
+import { AuditTrail } from "../models/audittrail";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -43,7 +44,7 @@ const requests = {
     post: <T> (url: string, body: {}) => axios.post<T>(url,body).then(responseBody),
     put: <T> (url: string, body: {}) => axios.put<T>(url,body).then(responseBody),
     del: <T> (url: string) => axios.delete<T>(url).then(responseBody),
-}
+} 
 
 const Roadmaps = {
     list: (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' = 'all') => {
@@ -54,9 +55,14 @@ const Roadmaps = {
     },    
 };
 
+const AuditTrails = {
+    list: () => requests.get<AuditTrail[]>('/audittrail') // This assumes there's an endpoint for fetching all audit trails
+};
+
  
 const agent = {
-    Roadmaps
+    Roadmaps,
+    AuditTrails
 }
 
 export default agent;

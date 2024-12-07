@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom"; // For navigation after logout
+import { NavLink, useNavigate } from "react-router-dom";
 import { useStore } from "../stores/store";
 import { useAuth } from "../../hooks/useAuth";
 import { observer } from "mobx-react-lite";
@@ -7,15 +7,14 @@ import { observer } from "mobx-react-lite";
 export default observer(function NavBar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { userStore } = useStore();
-    const navigate = useNavigate(); // Hook for navigation
-    const { user, loading } = useAuth(); // Destructure loading and user from useAuth
+    const navigate = useNavigate();
+    const { user, loading } = useAuth();
 
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const buttonRef = useRef<HTMLButtonElement | null>(null);
 
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
-    // Handle clicks outside of the dropdown and button
     const handleClickOutside = (event: MouseEvent) => {
         if (
             dropdownRef.current &&
@@ -23,35 +22,31 @@ export default observer(function NavBar() {
             buttonRef.current &&
             !buttonRef.current.contains(event.target as Node)
         ) {
-            setDropdownOpen(false); // Close the dropdown
+            setDropdownOpen(false);
         }
     };
 
-    // Handle logout
     const handleLogout = () => {
-        userStore.logout(); // Clear user session
-        navigate("/"); // Redirect to login page
+        userStore.logout();
+        navigate("/");
     };
 
     useEffect(() => {
-        // Add event listener when component mounts
         document.addEventListener("mousedown", handleClickOutside);
 
-        // Clean up the event listener when component unmounts
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
-    // If the user data is loading, you might want to return null or a loading spinner
-    if (loading) return null; // Or display a loading spinner if needed
+    if (loading) return null;
 
     return (
-        <nav className="bg-blue-600 shadow-lg">
+        <nav className="bg-blue-600 shadow-lg sticky top-0 z-50"> {/* Sticky NavBar */}
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
                 {/* Left: Logo */}
                 <div className="flex items-center space-x-3">
-                    <a href="/" className="flex items-center space-x-3">
+                    <a className="flex items-center space-x-3">
                         <img
                             src="/img/white-gosaas.png"
                             className="h-10"
@@ -73,41 +68,37 @@ export default observer(function NavBar() {
                 {/* Right: User Profile with Dropdown */}
                 <div className="relative flex items-center">
                     <button
-                        ref={buttonRef} // Attach ref to the button
+                        ref={buttonRef}
                         type="button"
                         className="flex items-center bg-blue-800 text-white rounded-full p-1 focus:ring-4 focus:ring-blue-300"
                         aria-expanded={dropdownOpen ? "true" : "false"}
                         onClick={toggleDropdown}
                     >
-                        {/* Render the user image or default image */}
                         <img
                             className="w-10 h-10 rounded-full"
                             src={user?.image || "/img/user.png"}
                             alt="User"
-                        /> 
+                        />
                     </button>
 
-                    {/* Dropdown Menu */}
                     {dropdownOpen && (
                         <div
-                            ref={dropdownRef} // Attach ref to the dropdown menu
+                            ref={dropdownRef}
                             className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50"
-                            style={{
-                                top: "100%", // Ensure it's positioned below the button
-                            }}
+                            style={{ top: "100%" }}
                         >
                             <ul className="py-2">
                                 <li>
-                                    <a
-                                        href="#"
+                                    <NavLink
+                                        to="audittrail"
                                         className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     >
-                                        <NavLink to="audittrail" className="block">Audit Trail</NavLink>
-                                    </a>
+                                        Audit Trail
+                                    </NavLink>
                                 </li>
                                 <li>
                                     <button
-                                        onClick={handleLogout} // Log out on click
+                                        onClick={handleLogout}
                                         className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
                                     >
                                         Log Out
