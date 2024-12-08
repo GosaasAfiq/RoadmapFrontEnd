@@ -9,22 +9,52 @@ export default class AuditTrailStore {
     loading = false;
     loadingInitial = false;
 
+    allUsers: string[] = [];
+    searchTerm: string = '';
+    userFilter: string = '';
+    startDate: Date | undefined = undefined;
+    endDate: Date | undefined = undefined;
+
     constructor() {
         makeAutoObservable(this);
     }
 
     loadAuditTrails = async () => {
-        console.log("Inside loadAuditTrails function"); 
         this.loadingInitial = true;
         try {
-            const auditTrails = await agent.AuditTrails.list(); // Fetch the audit trails using the API agent
+            const allAuditTrails = await agent.AuditTrails.list(); // Fetch all audit trails to get the complete user list
+            const filteredAuditTrails = await agent.AuditTrails.list(
+                this.searchTerm,
+                this.userFilter,
+                this.startDate,
+                this.endDate
+            );
+    
             runInAction(() => {
-                this.auditTrails = auditTrails;
+                this.allUsers = [...new Set(allAuditTrails.map((auditTrail) => auditTrail.user.username))];
+                this.auditTrails = filteredAuditTrails;
             });
-            this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to load audit trails:", error);
+        } finally {
             this.loadingInitial = false;
         }
+    };
+    
+
+    setSearchTerm = (term: string) => {
+        this.searchTerm = term;
+    };
+
+    setUserFilter = (user: string) => {
+        this.userFilter = user;
+    };
+
+    setStartDate = (date: Date | undefined) => {
+        this.startDate = date;
+    };
+
+    setEndDate = (date: Date | undefined) => {
+        this.endDate = date;
     };
 }

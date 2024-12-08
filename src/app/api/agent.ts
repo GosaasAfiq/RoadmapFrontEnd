@@ -56,7 +56,15 @@ const Roadmaps = {
 };
 
 const AuditTrails = {
-    list: () => requests.get<AuditTrail[]>('/audittrail') // This assumes there's an endpoint for fetching all audit trails
+    list: (searchTerm?: string, userFilter?: string, startDate?: Date, endDate?: Date) => {
+        const params = new URLSearchParams();
+        if (searchTerm) params.append('searchTerm', searchTerm);
+        if (userFilter) params.append('userFilter', userFilter);
+        if (startDate) params.append('startDate', startDate.toISOString());
+        if (endDate) params.append('endDate', endDate.toISOString());
+
+        return requests.get<AuditTrail[]>(`/audittrail?${params.toString()}`);
+    }
 };
 
  

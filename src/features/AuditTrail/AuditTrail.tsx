@@ -1,22 +1,54 @@
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default observer(function AuditTrail() {
     const { auditTrailStore } = useStore();
-    const { loadAuditTrails, loadingInitial, auditTrails } = auditTrailStore;
+    const { loadAuditTrails, loadingInitial, auditTrails, allUsers } = auditTrailStore;
+
+    // State for input values (before applying filters)
+    const [tempSearchTerm, setTempSearchTerm] = useState('');
+    const [tempUserFilter, setTempUserFilter] = useState('');
+    const [tempStartDate, setTempStartDate] = useState<Date | undefined>(undefined);
+    const [tempEndDate, setTempEndDate] = useState<Date | undefined>(undefined);
+
+    // State for applied filters
+    const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
+    const [appliedUserFilter, setAppliedUserFilter] = useState('');
+    const [appliedStartDate, setAppliedStartDate] = useState<Date | undefined>(undefined);
+    const [appliedEndDate, setAppliedEndDate] = useState<Date | undefined>(undefined);
 
     useEffect(() => {
         console.log("Loading audit trails...");
         loadAuditTrails(); // Load audit trails when the component mounts
     }, [auditTrailStore]);
 
-    useEffect(() => {
-        console.log("Audit Trails:", auditTrails);
-    }, [auditTrails]);
+    if (loadingInitial) return <LoadingComponent content="Loading..." />;
 
-    if (loadingInitial) return <LoadingComponent content="Loading..." />
+    const handleApplyFilters = () => {
+        setAppliedSearchTerm(tempSearchTerm);
+        setAppliedUserFilter(tempUserFilter);
+        setAppliedStartDate(tempStartDate);
+        setAppliedEndDate(tempEndDate);
+    };
+
+    // Filter audit trails based on the applied filters
+    const filteredAuditTrails = auditTrails.filter((auditTrail) => {
+        const matchesSearchTerm =
+            appliedSearchTerm
+                ? auditTrail.action.toLowerCase().includes(appliedSearchTerm.toLowerCase()) ||
+                  auditTrail.user.username.toLowerCase().includes(appliedSearchTerm.toLowerCase())
+                : true;
+        const matchesUserFilter = appliedUserFilter ? auditTrail.user.username === appliedUserFilter : true;
+        const matchesStartDate = appliedStartDate ? new Date(auditTrail.timestamp) >= appliedStartDate : true;
+        const matchesEndDate = appliedEndDate 
+            ? new Date(auditTrail.timestamp) <= new Date(appliedEndDate.getTime() + 86400000) 
+            : true;
+
+
+        return matchesSearchTerm && matchesUserFilter && matchesStartDate && matchesEndDate;
+    });
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
@@ -31,6 +63,13 @@ export default observer(function AuditTrail() {
                     <input
                         type="text"
                         placeholder="Search..."
+                        value={tempSearchTerm}
+                        onChange={(e) => setTempSearchTerm(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleApplyFilters(); // Apply filters on Enter
+                            }
+                        }}
                         className="p-3 w-full sm:w-64 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                     />
                 </div>
@@ -38,9 +77,17 @@ export default observer(function AuditTrail() {
                 {/* Filter by User */}
                 <div className="flex flex-col w-full sm:w-auto">
                     <label className="text-sm text-gray-600 mb-1">Filter by User</label>
-                    <select className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none">
+                    <select
+                        value={tempUserFilter}
+                        onChange={(e) => setTempUserFilter(e.target.value)} // Update temp value only
+                        className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
+                    >
                         <option value="">Select User</option>
-                        {/* Add user options dynamically if needed */}
+                        {allUsers.map((username) => (
+                            <option key={username} value={username}>
+                                {username}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
@@ -49,6 +96,8 @@ export default observer(function AuditTrail() {
                     <label className="text-sm text-gray-600 mb-1">Start Date</label>
                     <input
                         type="date"
+                        value={tempStartDate?.toISOString().slice(0, 10) || ''}
+                        onChange={(e) => setTempStartDate(e.target.value ? new Date(e.target.value) : undefined)}
                         className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                     />
                 </div>
@@ -58,13 +107,18 @@ export default observer(function AuditTrail() {
                     <label className="text-sm text-gray-600 mb-1">End Date</label>
                     <input
                         type="date"
+                        value={tempEndDate?.toISOString().slice(0, 10) || ''}
+                        onChange={(e) => setTempEndDate(e.target.value ? new Date(e.target.value) : undefined)}
                         className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                     />
                 </div>
 
                 {/* Apply Button */}
                 <div className="ml-auto">
-                    <button className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto">
+                    <button
+                        onClick={handleApplyFilters}
+                        className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto"
+                    >
                         Apply
                     </button>
                 </div>
@@ -81,15 +135,23 @@ export default observer(function AuditTrail() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {auditTrails.map((auditTrail) => (
-                            <tr key={auditTrail.id}>
-                                <td className="px-6 py-4 text-gray-700">{auditTrail.user.username}</td>
-                                <td className="px-6 py-4 text-gray-700">
-                                    {new Date(auditTrail.timestamp).toLocaleString()}
+                        {filteredAuditTrails.length > 0 ? (
+                            filteredAuditTrails.map((auditTrail) => (
+                                <tr key={auditTrail.id}>
+                                    <td className="px-6 py-4 text-gray-700">{auditTrail.user.username}</td>
+                                    <td className="px-6 py-4 text-gray-700">
+                                        {new Date(auditTrail.timestamp).toLocaleString()}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-700">{auditTrail.action}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={3} className="px-6 py-4 text-center text-gray-500">
+                                    No audit trails match the filters.
                                 </td>
-                                <td className="px-6 py-4 text-gray-700">{auditTrail.action}</td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
