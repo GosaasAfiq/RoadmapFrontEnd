@@ -20,18 +20,18 @@ export default observer(function AuditTrail() {
     const [appliedEndDate, setAppliedEndDate] = useState<Date | undefined>(undefined);
 
     useEffect(() => {
-        console.log("Loading audit trails...");
-        loadAuditTrails(); // Load audit trails when the component mounts
-    }, [auditTrailStore]);
+        loadAuditTrails(); // Load audit trails when filters change
+    }, [auditTrailStore.searchTerm, auditTrailStore.userFilter, auditTrailStore.startDate, auditTrailStore.endDate]);
+    
 
     if (loadingInitial) return <LoadingComponent content="Loading..." />;
 
     const handleApplyFilters = () => {
-        setAppliedSearchTerm(tempSearchTerm);
-        setAppliedUserFilter(tempUserFilter);
-        setAppliedStartDate(tempStartDate);
-        setAppliedEndDate(tempEndDate);
-    };
+    auditTrailStore.setSearchTerm(tempSearchTerm);
+    auditTrailStore.setUserFilter(tempUserFilter);
+    auditTrailStore.setStartDate(tempStartDate);
+    auditTrailStore.setEndDate(tempEndDate);
+};
 
     // Filter audit trails based on the applied filters
     const filteredAuditTrails = auditTrails.filter((auditTrail) => {
@@ -83,11 +83,12 @@ export default observer(function AuditTrail() {
                         className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                     >
                         <option value="">Select User</option>
-                        {allUsers.map((username) => (
-                            <option key={username} value={username}>
-                                {username}
-                            </option>
-                        ))}
+                        {allUsers.length > 0 &&
+                            allUsers.map((username) => (
+                                <option key={username} value={username}>
+                                    {username}
+                                </option>
+                            ))}
                     </select>
                 </div>
 
