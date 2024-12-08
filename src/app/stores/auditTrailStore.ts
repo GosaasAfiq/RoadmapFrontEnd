@@ -64,7 +64,12 @@ export default class AuditTrailStore {
         }
     };
       
-    
+    resetFilters = () => {
+        this.searchTerm = '';
+        this.userFilter = '';
+        this.startDate = undefined;
+        this.endDate = undefined;
+    };
 
     setSearchTerm = (term: string) => {
         this.searchTerm = term;

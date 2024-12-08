@@ -2,10 +2,12 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { useLocation } from "react-router-dom";
 
 export default observer(function AuditTrail() {
     const { auditTrailStore } = useStore();
-    const { loadAuditTrails, loadingInitial, auditTrails, allUsers } = auditTrailStore;
+    const { loadAuditTrails, loadingInitial, auditTrails, allUsers, resetFilters  } = auditTrailStore;
+    const location = useLocation();
 
     // State for input values (before applying filters)
     const [tempSearchTerm, setTempSearchTerm] = useState('');
@@ -22,6 +24,12 @@ export default observer(function AuditTrail() {
     useEffect(() => {
         loadAuditTrails(); // Load audit trails when filters change
     }, [auditTrailStore.searchTerm, auditTrailStore.userFilter, auditTrailStore.startDate, auditTrailStore.endDate]);
+
+    useEffect(() => {
+        return () => {
+            resetFilters();  // Call resetFilters to clear all filters
+        };
+    }, [location]);
     
 
     if (loadingInitial) return <LoadingComponent content="Loading..." />;
