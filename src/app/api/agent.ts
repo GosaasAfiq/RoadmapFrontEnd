@@ -2,6 +2,7 @@ import axios,{AxiosResponse}from "axios";
 import { Roadmap } from "../models/roadmap";
 import { store } from "../stores/store";
 import { AuditTrail } from "../models/audittrail";
+import { User } from "../models/user";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -56,22 +57,39 @@ const Roadmaps = {
 };
 
 const AuditTrails = {
-    list: (searchTerm?: string, userFilter?: string, startDate?: Date, endDate?: Date) => {
+    list: (
+        searchTerm?: string,
+        userFilter?: string,
+        startDate?: Date,
+        endDate?: Date,
+        page: number = 1,
+        pageSize: number = 6
+    ) => {
         const params = new URLSearchParams();
         if (searchTerm) params.append('searchTerm', searchTerm);
         if (userFilter) params.append('userFilter', userFilter);
         if (startDate) params.append('startDate', startDate.toISOString());
         if (endDate) params.append('endDate', endDate.toISOString());
+        params.append('page', page.toString());
+        params.append('pageSize', pageSize.toString());
 
-        return requests.get<AuditTrail[]>(`/audittrail?${params.toString()}`);
+        // Update the type to match the backend result structure
+        return requests.get<{ totalCount: number; items: AuditTrail[] }>(`/audittrail?${params.toString()}`);
     }
 };
 
 
+const Users = {
+    list: () => requests.get<User[]>('/users'), // Adjust the endpoint if necessary
+};
+
  
 const agent = {
     Roadmaps,
-    AuditTrails
+    AuditTrails,
+    Users
 }
+
+
 
 export default agent;

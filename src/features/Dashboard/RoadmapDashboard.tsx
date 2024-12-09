@@ -72,6 +72,7 @@ export default observer(function RoadmapDashboard() {
 
             {/* Icons Section */}
             <div className="flex justify-end items-center space-x-4 mb-6">
+                
                 {/* List Icon */}
                 <div 
                     onClick={() => handleViewSwitch('list')} 
@@ -86,6 +87,17 @@ export default observer(function RoadmapDashboard() {
                     className={`flex items-center justify-center w-10 h-10 ${isListView ? 'bg-gray-300' : 'hover:bg-gray-300'} transition cursor-pointer`}
                 >
                     <FontAwesomeIcon icon={faList} className="text-gray-800 text-xl" />
+                </div>
+
+                <div>
+                    <select
+                        id="paginationDropdown"
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
+                    >
+                        <option value="6">6</option>
+                        <option value="9">9</option>
+                        <option value="12">12</option>
+                    </select>
                 </div>
             </div>
 

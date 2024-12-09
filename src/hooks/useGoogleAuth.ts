@@ -21,7 +21,6 @@ export const useGoogleAuth = () => {
             });
             
             
-            
 
             if (!response.ok) {
                 throw new Error("Failed to authenticate with Google");
@@ -37,6 +36,7 @@ export const useGoogleAuth = () => {
                 updatedAt: data.updatedAt,
                 image: data.image,
             };
+            console.log("Real Credential Token:", data.token);
 
             // Save the user and redirect
             login(user);

@@ -15,11 +15,6 @@ export default observer(function AuditTrail() {
     const [tempStartDate, setTempStartDate] = useState<Date | undefined>(undefined);
     const [tempEndDate, setTempEndDate] = useState<Date | undefined>(undefined);
 
-    // State for applied filters
-    const [appliedSearchTerm, setAppliedSearchTerm] = useState('');
-    const [appliedUserFilter, setAppliedUserFilter] = useState('');
-    const [appliedStartDate, setAppliedStartDate] = useState<Date | undefined>(undefined);
-    const [appliedEndDate, setAppliedEndDate] = useState<Date | undefined>(undefined);
 
     useEffect(() => {
         loadAuditTrails(); // Load audit trails when filters change
@@ -30,7 +25,11 @@ export default observer(function AuditTrail() {
             resetFilters();  // Call resetFilters to clear all filters
         };
     }, [location]);
-    
+
+    useEffect(() => {
+        auditTrailStore.loadAllUsers(); // Fetch all users for the dropdown
+    }, [auditTrailStore]);
+
 
     if (loadingInitial) return <LoadingComponent content="Loading..." />;
 
@@ -44,16 +43,16 @@ export default observer(function AuditTrail() {
     // Filter audit trails based on the applied filters
     const filteredAuditTrails = auditTrails.filter((auditTrail) => {
         const matchesSearchTerm =
-            appliedSearchTerm
-                ? auditTrail.action.toLowerCase().includes(appliedSearchTerm.toLowerCase()) ||
-                  auditTrail.user.username.toLowerCase().includes(appliedSearchTerm.toLowerCase())
+            auditTrailStore.searchTerm
+                ? auditTrail.action.toLowerCase().includes(auditTrailStore.searchTerm.toLowerCase()) ||
+                  auditTrail.user.username.toLowerCase().includes(auditTrailStore.searchTerm.toLowerCase())
                 : true;
-        const matchesUserFilter = appliedUserFilter ? auditTrail.user.username === appliedUserFilter : true;
-        const matchesStartDate = appliedStartDate ? new Date(auditTrail.timestamp) >= appliedStartDate : true;
-        const matchesEndDate = appliedEndDate 
-            ? new Date(auditTrail.timestamp) <= new Date(appliedEndDate.getTime() + 86400000) 
-            : true;
-
+        const matchesUserFilter = auditTrailStore.userFilter ? auditTrail.user.username === auditTrailStore.userFilter : true;
+        const matchesStartDate = auditTrailStore.startDate ? new Date(auditTrail.timestamp) >= auditTrailStore.startDate : true;
+        const matchesEndDate =
+            auditTrailStore.endDate
+                ? new Date(auditTrail.timestamp) <= new Date(auditTrailStore.endDate.getTime() + 86400000)
+                : true;
 
         return matchesSearchTerm && matchesUserFilter && matchesStartDate && matchesEndDate;
     });
@@ -87,7 +86,7 @@ export default observer(function AuditTrail() {
                     <label className="text-sm text-gray-600 mb-1">Filter by User</label>
                     <select
                         value={tempUserFilter}
-                        onChange={(e) => setTempUserFilter(e.target.value)} // Update temp value only
+                        onChange={(e) => setTempUserFilter(e.target.value)}
                         className="p-3 w-full sm:w-48 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                     >
                         <option value="">Select User</option>
@@ -99,6 +98,7 @@ export default observer(function AuditTrail() {
                             ))}
                     </select>
                 </div>
+
 
                 {/* Filter by Start Date */}
                 <div className="flex flex-col w-full sm:w-auto">
@@ -123,14 +123,33 @@ export default observer(function AuditTrail() {
                 </div>
 
                 {/* Apply Button */}
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center space-x-4">
                     <button
                         onClick={handleApplyFilters}
                         className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto"
                     >
                         Apply
                     </button>
+
+                     {/* Pagination Dropdown */}
+                    <div>
+                    <select
+                        id="paginationDropdown"
+                        value={auditTrailStore.pageSize}
+                        onChange={(e) => {
+                            auditTrailStore.setPageSize(parseInt(e.target.value, 10));
+                            auditTrailStore.loadAuditTrails(); // Reload data on page size change
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
+                    >
+                        <option value="6">6</option>
+                        <option value="9">9</option>
+                        <option value="12">12</option>
+                    </select>
+                    </div>
                 </div>
+
+
             </div>
 
             {/* Table */}
@@ -164,6 +183,44 @@ export default observer(function AuditTrail() {
                     </tbody>
                 </table>
             </div>
+
+
+            <div className="flex justify-between items-center mt-4">
+    {/* Previous Button */}
+    <button
+        disabled={auditTrailStore.page === 1}
+        onClick={() => {
+            auditTrailStore.setPage(auditTrailStore.page - 1);
+            auditTrailStore.loadAuditTrails();
+        }}
+        className={`px-4 py-2 rounded-lg shadow ${auditTrailStore.page === 1 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+    >
+        Previous
+    </button>
+    
+    {/* Page Number */}
+    <span>Page {auditTrailStore.page}</span>
+    
+    {/* Next Button */}
+    <button
+        disabled={
+            // Disable if on the last page of filtered data
+            auditTrailStore.page >= Math.ceil(auditTrailStore.totalCount / auditTrailStore.pageSize)
+        }
+        onClick={() => {
+            auditTrailStore.setPage(auditTrailStore.page + 1);
+            auditTrailStore.loadAuditTrails();
+        }}
+        className={`px-4 py-2 rounded-lg shadow ${auditTrailStore.page >= Math.ceil(auditTrailStore.totalCount / auditTrailStore.pageSize) ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
+    >
+        Next
+    </button>
+</div>
+
+
+
+
+
         </div>
     );
 });
