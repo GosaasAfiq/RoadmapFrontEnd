@@ -48,12 +48,14 @@ const requests = {
 } 
 
 const Roadmaps = {
-    list: (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' = 'all') => {
+    list: (searchTerm?: string, filter: 'all' | 'draft' | 'not-started'| 'in-progress' | 'completed' = 'all') => {
         const params = new URLSearchParams();
         if (searchTerm) params.append('searchTerm', searchTerm);
-        if (filter !== 'all') params.append('filter', filter); // Add the filter parameter if it's not 'all'
+        if (filter !== 'all') params.append('filter', filter); // Add the filt | 'in-progress' | 'completed'er parameter if it's not 'all'
         return requests.get<Roadmap[]>(`/roadmaps?${params.toString()}`);
-    },    
+    },     
+    details: (id: string) =>
+        requests.get<Roadmap>(`/roadmaps/${id}`),
 };
 
 const AuditTrails = {

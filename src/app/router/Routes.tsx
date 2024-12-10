@@ -4,6 +4,7 @@ import Login from "../../features/Login/Login";
 import RoadmapDashboard from "../../features/Dashboard/RoadmapDashboard";
 import CreateRoadmap from "../../features/Create/CreateRoadmap";
 import AuditTrail from "../../features/AuditTrail/AuditTrail";
+import Details from "../../features/View/Details";
 
 
 export const routes: RouteObject[] = [
@@ -13,8 +14,9 @@ export const routes: RouteObject[] = [
         children:[
             {path: '', element:<Login/>},
             {path: 'roadmaps', element:<RoadmapDashboard/>},
-            {path: 'create', element:<CreateRoadmap/>},
+            {path: 'create', element:<CreateRoadmap/>}, 
             {path: 'audittrail', element:<AuditTrail/>},
+            { path: 'roadmaps/:id', element: <Details /> },
         ]
     },
 ]

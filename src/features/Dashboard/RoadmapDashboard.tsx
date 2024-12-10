@@ -19,7 +19,7 @@ export default observer(function RoadmapDashboard() {
     const initialView = localStorage.getItem('view') || 'list'; 
     const [isListView, setIsListView] = useState(initialView === 'table');
     const [searchTerm, setSearchTerm] = useState('');
-    const [filter, setFilter] = useState<"all" | "draft" | "not-started">("all");
+    const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed">("all");
 
     const handleSearch = _.debounce(() => {
         roadmapStore.loadRoadmaps(searchTerm, filter);

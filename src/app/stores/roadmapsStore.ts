@@ -8,22 +8,33 @@ export default class RoadmapStore {
     selectedRoadmap: Roadmap | null = null;
     loading = false;
     loadingInitial = false;
-    totalFilterCounts = { all: 0, draft: 0, "not-started": 0 }; // Consistent counts
+    totalFilterCounts = { all: 0, draft: 0, "not-started": 0, "in-progress" : 0, "completed" : 0}; // Consistent counts
 
-    filterCounts: { all: number; draft: number; "not-started": number } = {
+    filterCounts: { all: number; draft: number; "not-started": number;"in-progress": number; completed: number;  } = {
         all: 0,
         draft: 0,
-        "not-started": 0
+        "not-started": 0,
+        "in-progress": 0,
+        completed: 0,
+
     };
 
     constructor() {
         makeAutoObservable(this);
     }
+
+    private hasCompletedNode(nodes: any[]): boolean {
+        return nodes.some((node) =>
+            node.isCompleted || (node.children && this.hasCompletedNode(node.children))
+        );
+    }
  
-    loadRoadmaps = async (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' = 'all') => {
+    loadRoadmaps = async (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed' = 'all') => {
         this.loadingInitial = true;
         try {
             const roadmaps = await agent.Roadmaps.list(searchTerm, filter); // Pass both parameters
+            console.log(roadmaps[0]);
+            
             runInAction(() => {
                 this.roadmaps = roadmaps;
                 if (!searchTerm && filter === "all") {
@@ -37,17 +48,57 @@ export default class RoadmapStore {
             this.loadingInitial = false;
         }
     };
+
+    loadRoadmap = async (id: string) => {
+        this.loading = true;
+        try {
+            const roadmap = await agent.Roadmaps.details(id); // Assume `agent.Roadmaps.details` fetches the roadmap by ID
+            runInAction(() => {
+                this.selectedRoadmap = roadmap; // Set the fetched roadmap as selected
+            });
+            this.loading = false;
+        } catch (error) {
+            console.error("Failed to load the roadmap:", error);
+            this.loading = false;
+        }
+    };
+    
     
 
     resetFilterCounts = () => {
-        this.filterCounts = { all: 0, draft: 0, "not-started": 0 };
+        this.filterCounts = {
+            all: 0,
+            draft: 0,
+            "not-started": 0,
+            "in-progress": 0,
+            completed: 0,
+        };
     };
 
+    // Helper function to recursively check if any node or sub-node is completed
+    
+
     updateFilterCounts = () => {
-        // Calculate counts based on the full roadmap list
         this.filterCounts.all = this.allRoadmaps.length;
         this.filterCounts.draft = this.allRoadmaps.filter((r) => !r.isPublished).length;
-        this.filterCounts["not-started"] = this.allRoadmaps.filter((r) => r.isPublished).length;
+        // "Not Started" filter: No completed nodes in any hierarchy
+        this.filterCounts["not-started"] = this.allRoadmaps.filter((r) =>
+            r.isPublished &&
+            !r.isCompleted &&
+            !this.hasCompletedNode(r.nodes) // Use recursive check for completed nodes
+        ).length;
+
+        // "In Progress" filter: At least one completed node in the hierarchy
+        this.filterCounts["in-progress"] = this.allRoadmaps.filter((r) =>
+            r.isPublished &&
+            !r.isCompleted &&
+            this.hasCompletedNode(r.nodes) // Use recursive check for completed nodes
+        ).length;
+        this.filterCounts.completed = this.allRoadmaps.filter((r) => r.isCompleted).length;
     };
+
+
     
-}
+    
+    
+} 

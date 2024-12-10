@@ -2,19 +2,25 @@ import { FC, useState, useEffect, useRef } from "react";
 import _ from "lodash"; // Import lodash for debounce
 
 interface FilterProps {
-  filter: "all" | "draft" | "not-started";
-  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" | "not-started">>;
-  filterCounts: { all: number; draft: number; "not-started": number };
-  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" | "not-started") => void;
+  filter: "all" | "draft" | "not-started" | "in-progress" | "completed"; // Include new filters
+  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" | "not-started" | "in-progress" | "completed">>;
+  filterCounts: { 
+    all: number; 
+    draft: number; 
+    "not-started": number; 
+    "in-progress": number; 
+    completed: number; 
+  };
+  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" | "not-started" | "in-progress" | "completed") => void; // Update filter type
   searchTerm: string;
 }
 
 const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps, searchTerm }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown 
 
   // Debounced filter change handler
-  const handleFilterChange = _.debounce((newFilter: "all" | "draft" | "not-started") => {
+  const handleFilterChange = _.debounce((newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed") => {
     setFilter(newFilter); // Update the filter state
     loadRoadmaps(searchTerm, newFilter); // Trigger loadRoadmaps with the correct filter
   }, 500); // Adjust debounce delay as needed
@@ -46,6 +52,8 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps
           {filter === "all" && `All (${filterCounts.all})`}
           {filter === "draft" && `Draft (${filterCounts.draft})`}
           {filter === "not-started" && `Not Started (${filterCounts["not-started"]})`}
+          {filter === "in-progress" && `In Progress (${filterCounts["in-progress"]})`}
+          {filter === "completed" && `Completed (${filterCounts.completed})`}
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -84,6 +92,20 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps
             <span className="ml-auto text-sm font-medium text-gray-500">
               {filterCounts["not-started"]}
             </span>
+          </div>
+          <div
+            className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+            onClick={() => handleFilterChange("in-progress")}
+          >
+            <span>In Progress</span>
+            <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts["in-progress"]}</span>
+          </div>
+          <div
+            className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+            onClick={() => handleFilterChange("completed")}
+          >
+            <span>Completed</span>
+            <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts.completed}</span>
           </div>
         </div>
       )}

@@ -1,13 +1,15 @@
+import { User } from "./user";
+import { Node } from "./node";
+
 export interface Roadmap {
-    id: string
-    userId: string
-    roadmapName: string
-    isPublished: boolean
-    isCompleted: boolean
-    isDeleted: boolean
-    createdAt: string
-    updatedAt: string
-    user: any
-    nodes: any
-  }
-  
+    id: string;
+    userId: string;
+    roadmapName: string;
+    isPublished: boolean;
+    isCompleted: boolean;
+    isDeleted?: boolean; // Optional if not always used
+    createdAt: string;
+    updatedAt: string;
+    user?: User; // Replaced 'any' with User type from user.ts
+    nodes: Node[]; // Import and use the Node type from node.ts
+}
