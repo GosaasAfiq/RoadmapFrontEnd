@@ -3,6 +3,7 @@ import { Roadmap } from "../models/roadmap";
 import { store } from "../stores/store";
 import { AuditTrail } from "../models/audittrail";
 import { User } from "../models/user";
+import { CreateRoadmapData } from "../models/create/createRoadmap";
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
@@ -56,6 +57,13 @@ const Roadmaps = {
     },     
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
+    create: (data: CreateRoadmapData) => {
+        console.log('Data being sent to create roadmap = ', JSON.stringify(data, null, 2)); // Log the data
+        return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
+    }
+    
+    
+
 };
 
 const AuditTrails = {

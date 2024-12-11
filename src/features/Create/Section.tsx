@@ -75,7 +75,7 @@ export default function Section({
     // Function to add a new subsection
     const addSubSection = () => {
         const updatedSubSections = [
-            ...section.subSections,
+            ...section.subSections, 
             { name: "", startDate: "", endDate: "", description: "" },
         ];
         handleSectionChange(
@@ -125,6 +125,7 @@ export default function Section({
                 {/* Collapsible Icon for subsections */}
                 {section.subSections.length > 0 && (
                     <button
+                        type="button"  
                         onClick={toggleSubSectionsCollapse}
                         aria-label={isSubSectionsCollapsed ? "Expand subsections" : "Collapse subsections"}
                         className="text-blue-500"
@@ -205,6 +206,7 @@ export default function Section({
 
                 {/* Description Button */}
                 <button
+                    type="button"  
                     onClick={openDescriptionModal}
                     className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
                 >
@@ -213,6 +215,7 @@ export default function Section({
 
                 {/* Delete Section Button */}
                 <button
+                    type="button"  
                     onClick={() => deleteSection(milestoneIndex, sectionIndex)}
                     className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
                 >
@@ -221,6 +224,7 @@ export default function Section({
 
                 {/* Add SubSection Button */}
                 <button
+                    type="button"  
                     onClick={addSubSection}
                     className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600"
                 >
@@ -257,12 +261,14 @@ export default function Section({
                         />
                         <div className="mt-4 flex justify-end gap-4">
                             <button
+                                type="button"  
                                 onClick={closeDescriptionModal}
                                 className="bg-gray-500 text-white px-6 py-2 rounded-md shadow hover:bg-gray-600"
                             >
                                 Close
                             </button>
                             <button
+                                type="button"  
                                 onClick={saveDescription}
                                 className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600"
                             >

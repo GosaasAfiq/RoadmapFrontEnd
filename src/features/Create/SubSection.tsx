@@ -92,6 +92,7 @@ export default function SubSection({
 
             {/* Description Button */}
             <button
+                type="button"  
                 onClick={openDescriptionModal}
                 className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
             >
@@ -100,6 +101,7 @@ export default function SubSection({
 
             {/* Delete SubSection Button */}
             <button
+                type="button"  
                 onClick={() => deleteSubSection(subSectionIndex)}
                 className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
             >
@@ -120,12 +122,14 @@ export default function SubSection({
                         />
                         <div className="mt-4 flex justify-end gap-4">
                             <button
+                                type="button"  
                                 onClick={closeDescriptionModal}
                                 className="bg-gray-500 text-white px-6 py-2 rounded-md shadow hover:bg-gray-600"
                             >
                                 Close
                             </button>
                             <button
+                                type="button"  
                                 onClick={saveDescription}
                                 className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600"
                             >

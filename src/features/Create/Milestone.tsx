@@ -83,11 +83,11 @@ export default function Milestone({
     const handleDeleteMilestone = () => {
         deleteMilestone(milestoneIndex);
     };
-
+ 
     return (
         <div key={milestoneIndex} className="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
             <div className="flex items-center gap-x-4">
-                <button onClick={toggleCollapse} aria-label={isCollapsed ? "Expand sections" : "Collapse sections"} className="text-blue-500">
+                <button type="button"   onClick={toggleCollapse} aria-label={isCollapsed ? "Expand sections" : "Collapse sections"} className="text-blue-500">
                     <FontAwesomeIcon icon={isCollapsed ? faCaretDown : faCaretUp} className="text-xl" />
                 </button>
 
@@ -124,9 +124,9 @@ export default function Milestone({
                     />
                 </div>
 
-                <button onClick={openDescriptionModal} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600">Description</button>
-                <button onClick={handleDeleteMilestone} className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Delete</button>
-                <button onClick={() => addSection(milestoneIndex)} className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">+ Section</button>
+                <button type="button" onClick={openDescriptionModal} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600">Description</button>
+                <button type="button" onClick={handleDeleteMilestone} className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Delete</button>
+                <button type="button" onClick={() => addSection(milestoneIndex)} className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">+ Section</button>
             </div>
 
             {!isCollapsed && (
@@ -156,8 +156,8 @@ export default function Milestone({
                             placeholder="Enter description here"
                         />
                         <div className="mt-4 flex justify-end gap-4">
-                            <button onClick={closeDescriptionModal} className="bg-gray-500 text-white px-6 py-2 rounded-md shadow hover:bg-gray-600">Close</button>
-                            <button onClick={saveDescription} className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">Save</button>
+                            <button type="button" onClick={closeDescriptionModal} className="bg-gray-500 text-white px-6 py-2 rounded-md shadow hover:bg-gray-600">Close</button>
+                            <button type="button" onClick={saveDescription} className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">Save</button>
                         </div>
                     </div>
                 </div>

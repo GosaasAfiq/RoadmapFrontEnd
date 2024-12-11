@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import Milestone from "./Milestone";
+import { store } from "../../app/stores/store";
 
 interface SubSection {
     name: string;
@@ -28,7 +29,11 @@ interface Milestone {
 
 export default observer(function CreateRoadmap() {
     // State to hold the list of milestones
+    const [roadmapName, setRoadmapName] = useState("");
     const [milestones, setMilestones] = useState<Milestone[]>([]);
+
+    const { userStore } = store;  // Accessing the userStore from the global store
+    const userId = userStore.user?.id;
 
     // Function to add a new milestone row
     const addMilestone = () => {
@@ -98,6 +103,36 @@ export default observer(function CreateRoadmap() {
         setMilestones(updatedMilestones);
     };
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!userId) {
+            alert("User ID is required to create a roadmap.");
+            return;
+        }
+    
+        const dataToSend = {
+            roadmap: { // Wrap the data under "roadmap"
+                name: roadmapName,
+                userId: userId,
+                milestones: milestones,
+            },
+        };
+    
+        console.log(dataToSend);
+        
+        try {
+            // Use the createRoadmap method from the store
+            await store.roadmapStore.createRoadmap(dataToSend);
+            alert("Roadmap created successfully!");
+            // Optionally reset the form or redirect
+        } catch (error) {
+            console.error("Error submitting roadmap:", error);
+            alert("An error occurred while creating the roadmap.");
+        }
+    };
+
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Page Title */}
@@ -105,61 +140,68 @@ export default observer(function CreateRoadmap() {
 
             {/* Outer Box (Full Screen) */}
             <div className="flex-grow bg-white p-8 rounded-lg shadow-lg mx-8 relative">
-                {/* Roadmap Name Input and Buttons */}
-                <div className="flex justify-between items-center mb-6">
-                    {/* Roadmap Name Input */}
-                    <div className="w-2/3">
-                        <input
-                            type="text"
-                            id="roadmapName"
-                            placeholder="Enter roadmap name"
-                            className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
+                <form onSubmit={handleSubmit}>
+                    {/* Roadmap Name Input and Buttons */}
+                    <div className="flex justify-between items-center mb-6">
+                        {/* Roadmap Name Input */}
+                        <div className="w-2/3">
+                            <input
+                                type="text"
+                                id="roadmapName"
+                                value={roadmapName}
+                                onChange={(e) => setRoadmapName(e.target.value)}
+                                placeholder="Enter roadmap name"
+                                className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            />
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-4">
+                            <button type="button"  className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">
+                                Preview
+                            </button>
+                            <button type="button"  
+                                onClick={addMilestone}
+                                className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600"
+                            >
+                                + Milestone
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Buttons */}
-                    <div className="flex gap-4">
-                        <button className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">
-                            Preview
+                    {/* Inner Box */}
+                    <div className="bg-gray-50 p-8 rounded-lg border border-gray-300 h-full mb-6">
+                        {/* Milestone Details */}
+                        {milestones.map((milestone, milestoneIndex) => (
+                            <Milestone
+                                key={milestoneIndex}
+                                milestone={milestone}
+                                milestoneIndex={milestoneIndex}
+                                handleMilestoneChange={handleMilestoneChange}
+                                deleteMilestone={deleteMilestone}
+                                addSection={addSection}
+                                handleSectionChange={handleSectionChange}
+                                deleteSection={deleteSection}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Action Buttons (Cancel, Save, Publish) */}
+                    <div className="flex justify-end gap-4">
+                        <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
+                            Cancel
                         </button>
                         <button
-                            onClick={addMilestone}
-                            className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600"
+                            type="submit" // Change to type "submit" to trigger form submission
+                            className="bg-yellow-500 text-white px-6 py-2 rounded-md shadow hover:bg-yellow-600"
                         >
-                            + Milestone
+                            Save
+                        </button>
+                        <button type="button" className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
+                            Publish
                         </button>
                     </div>
-                </div>
-
-                {/* Inner Box */}
-                <div className="bg-gray-50 p-8 rounded-lg border border-gray-300 h-full mb-6">
-                    {/* Milestone Details */}
-                    {milestones.map((milestone, milestoneIndex) => (
-                        <Milestone
-                            key={milestoneIndex}
-                            milestone={milestone}
-                            milestoneIndex={milestoneIndex}
-                            handleMilestoneChange={handleMilestoneChange}
-                            deleteMilestone={deleteMilestone}
-                            addSection={addSection}
-                            handleSectionChange={handleSectionChange}
-                            deleteSection={deleteSection}
-                        />
-                    ))}
-                </div>
-
-                {/* Action Buttons (Cancel, Save, Publish) */}
-                <div className="flex justify-end gap-4">
-                    <button className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
-                        Cancel
-                    </button>
-                    <button className="bg-yellow-500 text-white px-6 py-2 rounded-md shadow hover:bg-yellow-600">
-                        Save
-                    </button>
-                    <button className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
-                        Publish
-                    </button>
-                </div>
+                </form>
             </div>
         </div>
     );

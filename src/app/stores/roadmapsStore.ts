@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import agent from "../api/agent";
 import { Roadmap } from "../models/roadmap";
+import { CreateRoadmapData } from "../models/create/createRoadmap";
 
 export default class RoadmapStore {
     roadmaps: Roadmap[] = [];
@@ -62,6 +63,22 @@ export default class RoadmapStore {
             this.loading = false;
         }
     };
+
+    createRoadmap = async (roadmapData: CreateRoadmapData) => {
+        try {
+            // Send the request to the backend to create the roadmap
+            const createdRoadmap = await agent.Roadmaps.create(roadmapData);
+    
+            // Process the response, e.g., add the new roadmap to the list
+            runInAction(() => {
+                this.roadmaps.push(createdRoadmap); // Add to roadmaps list
+                this.selectedRoadmap = createdRoadmap; // Optionally set as selected
+            });
+        } catch (error) {
+            console.error("Error creating roadmap:", error);
+        }
+    };
+    
     
     
 
