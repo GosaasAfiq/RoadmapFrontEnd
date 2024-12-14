@@ -10,6 +10,7 @@ export interface Roadmap {
     isDeleted?: boolean; // Optional if not always used
     createdAt: string;
     updatedAt: string;
+    completionRate: number; 
     user?: User; // Replaced 'any' with User type from user.ts
     nodes: Node[]; // Import and use the Node type from node.ts
 }

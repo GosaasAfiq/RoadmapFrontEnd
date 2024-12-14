@@ -22,7 +22,7 @@ const ListView: React.FC<ListViewProps> = ({ roadmaps }) => (
         {roadmaps.map((roadmap) => (
           <tr key={roadmap.id} className="hover:bg-gray-50">
             <td className="px-6 py-4 text-sm font-medium text-gray-800">{roadmap.roadmapName}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">In Progress</td>
+            <td className="px-6 py-4 text-sm text-gray-600">{roadmap.completionRate}</td>
             <td className="px-6 py-4 text-sm text-gray-600">01/01/2024</td>
             <td className="px-6 py-4 text-sm text-gray-600">12/31/2024</td>
             <td className="px-6 py-4 text-sm text-gray-600">

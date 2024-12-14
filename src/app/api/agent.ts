@@ -60,7 +60,7 @@ const Roadmaps = {
     create: (data: CreateRoadmapData) => {
         console.log('Data being sent to create roadmap = ', JSON.stringify(data, null, 2)); // Log the data
         return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
-    }
+    } 
 };
 
 const AuditTrails = {

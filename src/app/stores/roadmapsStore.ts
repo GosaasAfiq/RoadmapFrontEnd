@@ -62,7 +62,7 @@ export default class RoadmapStore {
             console.error("Failed to load the roadmap:", error);
             this.loading = false;
         }
-    };
+    }; 
 
     createRoadmap = async (roadmapData: CreateRoadmapData) => {
         try {
