@@ -2,6 +2,9 @@ import { observer } from "mobx-react-lite"; // For observing MobX state changes
 import NavBar from "./Navbar";
 import "./style.css";
 import { Outlet, useLocation, } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";  // Make sure this line is present
+
 
 function App() {
     const location = useLocation(); 
@@ -11,6 +14,7 @@ function App() {
         <div>
           {showNavBar && <NavBar />} {/* Conditionally render NavBar */}
           <Outlet /> {/* Render child routes here */}
+          <ToastContainer/>
         </div>
     );
 }

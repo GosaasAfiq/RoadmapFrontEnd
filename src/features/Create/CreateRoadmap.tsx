@@ -1,40 +1,31 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import Milestone from "./Milestone";
 import { store } from "../../app/stores/store";
-
-interface SubSection {
-    name: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-}
-
-// Define interfaces for Milestone and Section
-interface Section {
-    name: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-    subSections: SubSection[];
-}
+import { toast } from "react-toastify";
+import { Section } from "../../app/models/create/Section";
+import { SubSection } from "../../app/models/create/SubSection";
+import Milestone from "./Milestone";
+import { NavLink } from "react-router-dom";
 
 interface Milestone {
     name: string;
     startDate: string;
     endDate: string;
-    sections: Section[];
     description: string;
+    sections: Section[];
 }
+
 
 export default observer(function CreateRoadmap() {
     // State to hold the list of milestones
     const [roadmapName, setRoadmapName] = useState("");
     const [milestones, setMilestones] = useState<Milestone[]>([]);
 
+    const [action, setAction] = useState<string | null>(null);
+
+
     const { userStore } = store;  // Accessing the userStore from the global store
     const userId = userStore.user?.id;
-
     // Function to add a new milestone row
     const addMilestone = () => {
         setMilestones([
@@ -51,9 +42,21 @@ export default observer(function CreateRoadmap() {
         value: string
     ) => {
         const updatedMilestones = [...milestones];
-        updatedMilestones[index][field] = value; // Safe because "sections" is excluded
+        updatedMilestones[index][field] = value; // Safe because "sections" is excluded 
+
         setMilestones(updatedMilestones);
     };
+
+    const calculateMilestoneConstraints = (milestoneIndex: number) => {
+        const previousMilestone = milestones[milestoneIndex - 1];
+        const nextMilestone = milestones[milestoneIndex + 1];
+    
+        return {
+            minStartDate: previousMilestone ? previousMilestone.endDate : "",
+            maxEndDate: nextMilestone ? nextMilestone.startDate : "",
+        };
+    };
+    
 
     // Function to delete a milestone row
     const deleteMilestone = (index: number) => {
@@ -74,6 +77,42 @@ export default observer(function CreateRoadmap() {
         setMilestones(updatedMilestones);
     };
     
+    const calculateMilestoneDates = (milestoneIndex: number) => {
+        const milestone = milestones[milestoneIndex];
+    
+        if (milestone.sections.length === 0) {
+            return { startDate: "", endDate: "" };
+        }
+    
+        // Find the earliest startDate and latest endDate
+        const sortedSectionsByStart = milestone.sections.sort(
+            (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        );
+        const sortedSectionsByEnd = milestone.sections.sort(
+            (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+        );
+    
+        // Return the updated start and end dates for the milestone
+        return {
+            startDate: sortedSectionsByStart[0].startDate,
+            endDate: sortedSectionsByEnd[sortedSectionsByEnd.length - 1].endDate,
+        };
+    };
+
+    const calculateSectionConstraints = (milestoneIndex: number, sectionIndex: number) => {
+        const milestone = milestones[milestoneIndex];
+        const sections = milestone.sections;
+    
+        // Get the previous and next sections
+        const prevSection = sections[sectionIndex - 1];
+        const nextSection = sections[sectionIndex + 1];
+    
+        return {
+            minStartDate: prevSection?.endDate || "",
+            maxEndDate: nextSection?.startDate || "",
+        };
+    };
+    
 
     // Function to handle input changes for section fields
     const handleSectionChange = (
@@ -83,7 +122,8 @@ export default observer(function CreateRoadmap() {
         value: string | SubSection[] // Accept both string and SubSection[]
     ) => {
         const updatedMilestones = [...milestones];
-    
+
+
         if (field === "subSections") {
             // For subSections, assign the array directly
             updatedMilestones[milestoneIndex].sections[sectionIndex][field] = value as SubSection[];
@@ -91,10 +131,15 @@ export default observer(function CreateRoadmap() {
             // For the other fields, assign the string value
             updatedMilestones[milestoneIndex].sections[sectionIndex][field] = value as string;
         }
+
+        if (field === "startDate" || field === "endDate") {
+            const { startDate, endDate } = calculateMilestoneDates(milestoneIndex);
+            handleMilestoneChange(milestoneIndex, "startDate", startDate);
+            handleMilestoneChange(milestoneIndex, "endDate", endDate);
+        }
     
         setMilestones(updatedMilestones);
     };
-    
 
     // Function to delete a section from a milestone
     const deleteSection = (milestoneIndex: number, sectionIndex: number) => {
@@ -103,33 +148,99 @@ export default observer(function CreateRoadmap() {
         setMilestones(updatedMilestones);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const validateRoadmap = (): boolean => {
+        // Check if the roadmap name is filled
+        if (!roadmapName.trim()) {
+            toast.error("Roadmap name is required.");
+            return false;
+        }
+    
+        // Check if there is at least one milestone
+        if (milestones.length === 0) {
+            toast.error("At least one milestone is required.");
+            return false;
+        }
+    
+        let hasSection = false; // To track if at least one section is filled in any milestone
+    
+        // Validate each milestone
+        for (const [milestoneIndex, milestone] of milestones.entries()) {
+            // Validate the milestone itself (all fields must be filled)
+            if (!milestone.name.trim() || !milestone.startDate.trim() || !milestone.endDate.trim() || !milestone.description.trim()) {
+                toast.error(`All details for milestone ${milestoneIndex + 1} must be filled.`);
+                return false;
+            }
+    
+            // If the milestone has sections, check if at least one section is filled
+            if (milestone.sections.length > 0) {
+                hasSection = true; // Mark that we have at least one section
+                // Validate sections
+                for (const [sectionIndex, section] of milestone.sections.entries()) {
+                    if (!section.name.trim() || !section.startDate.trim() || !section.endDate.trim() || !section.description.trim()) {
+                        toast.error(`All details for section ${sectionIndex + 1} in milestone ${milestoneIndex + 1} must be filled.`);
+                        return false;
+                    }
+    
+                    // Validate subsections if they exist
+                    for (const [subSectionIndex, subSection] of section.subSections.entries()) {
+                        if (!subSection.name.trim() || !subSection.startDate.trim() || !subSection.endDate.trim() || !subSection.description.trim()) {
+                            toast.error(`All details for subsection ${subSectionIndex + 1} in section ${sectionIndex + 1} of milestone ${milestoneIndex + 1} must be filled.`);
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    
+        // Now check if there is at least one section across all milestones
+        if (!hasSection) {
+            toast.error("At least one section must be added to any milestone.");
+            return false;
+        }
+    
+        return true; // Validation passed
+    };
+    
+    
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault(); // Prevent form submission from refreshing the page
 
-        if (!userId) {
-            alert("User ID is required to create a roadmap.");
+        console.log("Action:", action);
+        
+        const isPublished = action === "publish"; // Check if the clicked button was "publish"
+
+        if (isPublished && !validateRoadmap()) {
+            // If validation fails, stop the submission
             return;
         }
-    
-        const dataToSend = {
-            roadmap: { // Wrap the data under "roadmap"
-                name: roadmapName,
-                userId: userId,
-                milestones: milestones,
-            },
-        };
-    
-        console.log(dataToSend);
-        
-        try {
-            // Use the createRoadmap method from the store
-            await store.roadmapStore.createRoadmap(dataToSend);
-            alert("Roadmap created successfully!");
-            // Optionally reset the form or redirect
-        } catch (error) {
-            console.error("Error submitting roadmap:", error);
-            alert("An error occurred while creating the roadmap.");
-        }
+
+        // if (validateRoadmap()) {
+            if (!userId) {
+                toast.error("User ID is required to create a roadmap.");
+                return;
+            }
+
+            const dataToSend = {
+                roadmap: { // Wrap the data under "roadmap"
+                    name: roadmapName,
+                    userId: userId,
+                    isPublished: isPublished, //false
+                    milestones: milestones,
+                },
+            }; 
+
+            console.log(dataToSend);
+            
+            // try {
+            //     // Use the createRoadmap method from the store
+            //     await store.roadmapStore.createRoadmap(dataToSend);
+            //     toast.success("Roadmap created successfully!");
+            //     // Optionally reset the form or redirect
+            // } catch (error) {
+            //     console.error("Error submitting roadmap:", error);
+            //     toast.error("An error occurred while creating the roadmap.");
+            // }
+        // }
     };
 
 
@@ -180,6 +291,10 @@ export default observer(function CreateRoadmap() {
                                 handleMilestoneChange={handleMilestoneChange}
                                 deleteMilestone={deleteMilestone}
                                 addSection={addSection}
+                                calculateSectionConstraints={(sectionIndex) =>
+                                    calculateSectionConstraints(milestoneIndex, sectionIndex)
+                                }
+                                calculateMilestoneConstraints={calculateMilestoneConstraints(milestoneIndex)} // Pass the constraints
                                 handleSectionChange={handleSectionChange}
                                 deleteSection={deleteSection}
                             />
@@ -188,16 +303,22 @@ export default observer(function CreateRoadmap() {
 
                     {/* Action Buttons (Cancel, Save, Publish) */}
                     <div className="flex justify-end gap-4">
-                        <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
-                            Cancel
-                        </button>
+                        <NavLink to="/roadmaps">
+                            <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
+                                Cancel
+                            </button>
+                        </NavLink>
                         <button
                             type="submit" // Change to type "submit" to trigger form submission
+                            onClick={() => setAction("save")}
                             className="bg-yellow-500 text-white px-6 py-2 rounded-md shadow hover:bg-yellow-600"
                         >
                             Save
                         </button>
-                        <button type="button" className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
+                        <button 
+                        type="submit"
+                        onClick={() => setAction("publish")}
+                        className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
                             Publish
                         </button>
                     </div>

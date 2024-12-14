@@ -1,4 +1,3 @@
-// src/utils/Dagre.tsx
 import dagre from "dagre";
 import { Node, Edge } from "react-flow-renderer";
 
@@ -11,21 +10,22 @@ const nodeHeight = 100;
 
 export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     dagreGraph.setGraph({ rankdir: "LR" }); // Left to right layout
-
+    
     // Add nodes to the graph
     nodes.forEach((node) => {
         dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
     });
-
+    
     // Add edges to the graph
     edges.forEach((edge) => {
-        dagreGraph.setEdge(edge.source, edge.target);
+        // Ensure that the edge source and target IDs are strings and match the node IDs
+        dagreGraph.setEdge(edge.source.toString(), edge.target.toString());
     });
 
     // Run the Dagre layout algorithm
     dagre.layout(dagreGraph);
 
-    // Calculate final positions for each node
+    // Update node positions based on the layout computed by Dagre
     nodes.forEach((node) => {
         const nodeWithPosition = dagreGraph.node(node.id);
         node.position = {

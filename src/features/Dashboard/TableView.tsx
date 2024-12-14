@@ -25,7 +25,12 @@ const TableView: React.FC<TableViewProps> = ({ roadmaps }) => (
           ) : (
             <>
               <button className="border border-blue-500 text-blue-500 rounded-md px-4 py-1">Draft</button>
-              <button className="border border-blue-500 text-blue-500 rounded-md px-4 py-1 hover:bg-blue-500 hover:text-white transition">Edit</button>
+              <NavLink 
+                to={`/roadmaps/${roadmap.id}`} // Navigate to Detail page
+                className="border border-blue-500 text-blue-500 rounded-md px-4 py-1 hover:bg-blue-500 hover:text-white transition"
+              >
+                  Edit
+              </NavLink>
             </>
           )} 
         </div>

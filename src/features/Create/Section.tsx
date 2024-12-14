@@ -16,7 +16,7 @@ interface Section {
     endDate: string;
     description: string;
     subSections: SubSection[];
-}
+} 
 
 interface Props {
     section: Section;
@@ -29,18 +29,24 @@ interface Props {
         value: string | SubSection[]
     ) => void;
     deleteSection: (milestoneIndex: number, sectionIndex: number) => void;
+    calculateSectionConstraints: () => { minStartDate: string; maxEndDate: string };
+
 }
 
 export default function Section({
     section,
     sectionIndex,
     milestoneIndex,
+    calculateSectionConstraints,
     handleSectionChange,
     deleteSection,
 }: Props) {
     const [isSubSectionsCollapsed, setIsSubSectionsCollapsed] = useState(false);
     const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
     const [tempDescription, setTempDescription] = useState(section.description);
+
+    const { minStartDate, maxEndDate } = calculateSectionConstraints();
+
 
     useEffect(() => {
         setTempDescription(section.description);
@@ -85,6 +91,7 @@ export default function Section({
             updatedSubSections
         );
     };
+    
 
     // Function to handle changes in a subsection
     const handleSubSectionChange = (
@@ -94,12 +101,49 @@ export default function Section({
     ) => {
         const updatedSubSections = [...section.subSections];
         updatedSubSections[subSectionIndex][field] = value;
+
+        const updatedStartDate = getUpdatedStartDate(updatedSubSections);
+        const updatedEndDate = getUpdatedEndDate(updatedSubSections);
+
         handleSectionChange(
             milestoneIndex,
             sectionIndex,
             "subSections",
             updatedSubSections
         );
+ 
+        handleSectionChange(milestoneIndex, sectionIndex, "startDate", updatedStartDate);
+        handleSectionChange(milestoneIndex, sectionIndex, "endDate", updatedEndDate);
+    };
+
+    // Helper function to get the latest end date from all subsections
+    const getMinStartDate = (subSectionIndex: number): string => {
+        if (subSectionIndex === 0) return ""; // No limit for the first subsection
+        const prevSubSection = section.subSections[subSectionIndex - 1];
+        return prevSubSection.endDate ? prevSubSection.endDate : ""; // Ensure startDate is after the previous endDate
+    };
+
+    // Helper function to get the latest end date from all subsections   
+    const getMaxEndDate = (subSectionIndex: number): string => {
+        if (subSectionIndex === section.subSections.length - 1) return ""; // No limit for the last subsection
+        const nextSubSection = section.subSections[subSectionIndex + 1];
+        return nextSubSection.startDate ? nextSubSection.startDate : ""; // Ensure endDate is before the next startDate
+    };
+    
+    // Helper function to get the latest end date from all subsections
+    const getUpdatedStartDate = (subSections: SubSection[]): string => {
+        const startDates = subSections.map((subSection) => subSection.startDate);
+        return startDates.reduce((earliestDate, currentDate) => {
+            return currentDate < earliestDate ? currentDate : earliestDate;
+        }, startDates[0]);
+    };
+    
+    // Helper function to get the latest end date from all subsections
+    const getUpdatedEndDate = (subSections: SubSection[]): string => {
+        const endDates = subSections.map((subSection) => subSection.endDate);
+        return endDates.reduce((latestDate, currentDate) => {
+            return currentDate > latestDate ? currentDate : latestDate;
+        }, endDates[0]);
     };
 
     // Function to delete a subsection
@@ -145,6 +189,7 @@ export default function Section({
                         value={section.name}
                         placeholder="Enter section name"
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        required
                         onChange={(e) =>
                             handleSectionChange(
                                 milestoneIndex,
@@ -169,6 +214,10 @@ export default function Section({
                         id={`sectionStartDate-${milestoneIndex}-${sectionIndex}`}
                         value={section.startDate}
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        disabled={section.subSections.length > 0} // Disable if subsections exist
+                        min={minStartDate} // Apply minimum constraint
+                        max={maxEndDate} // Apply maximum constraint
+
                         onChange={(e) =>
                             handleSectionChange(
                                 milestoneIndex,
@@ -193,6 +242,9 @@ export default function Section({
                         id={`sectionEndDate-${milestoneIndex}-${sectionIndex}`}
                         value={section.endDate}
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        disabled={section.subSections.length > 0} // Disable if subsections exist
+                        min={section.startDate || minStartDate} // Ensure end date is after or equal to start date
+                        max={maxEndDate} // Apply maximum constraint
                         onChange={(e) =>
                             handleSectionChange(
                                 milestoneIndex,
@@ -240,6 +292,8 @@ export default function Section({
                             key={subSectionIndex}
                             subSection={subSection}
                             subSectionIndex={subSectionIndex}
+                            minStartDate={getMinStartDate(subSectionIndex)}  // Call the function here
+                            maxEndDate={getMaxEndDate(subSectionIndex)}   
                             handleSubSectionChange={handleSubSectionChange}
                             deleteSubSection={deleteSubSection}
                         />

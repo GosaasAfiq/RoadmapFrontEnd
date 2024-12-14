@@ -5,17 +5,19 @@ interface SubSection {
     startDate: string;
     endDate: string;
     description: string;
-}
+} 
 
 interface SubSectionProps {
     subSection: SubSection;
     subSectionIndex: number;
-    handleSubSectionChange: (
+    handleSubSectionChange: ( 
         subSectionIndex: number,
         field: keyof SubSection,
         value: string
     ) => void;
     deleteSubSection: (subSectionIndex: number) => void;
+    minStartDate: string;  // New prop
+    maxEndDate: string;    // New prop
 }
 
 export default function SubSection({
@@ -23,6 +25,9 @@ export default function SubSection({
     subSectionIndex,
     handleSubSectionChange,
     deleteSubSection,
+    minStartDate,  // New prop
+    maxEndDate,  // New prop
+
 }: SubSectionProps) {
     const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
     const [tempDescription, setTempDescription] = useState(subSection.description);
@@ -60,6 +65,7 @@ export default function SubSection({
                     value={subSection.name}
                     placeholder="Enter subsection name"
                     className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    required
                     onChange={(e) =>
                         handleSubSectionChange(subSectionIndex, "name", e.target.value)
                     }
@@ -71,6 +77,8 @@ export default function SubSection({
                 <input
                     type="date"
                     value={subSection.startDate}
+                    min={minStartDate || ""}
+                    max={subSection.endDate || maxEndDate || ""}
                     className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     onChange={(e) =>
                         handleSubSectionChange(subSectionIndex, "startDate", e.target.value)
@@ -83,6 +91,8 @@ export default function SubSection({
                 <input
                     type="date"
                     value={subSection.endDate}
+                    min={subSection.startDate || minStartDate || ""}
+                    max={maxEndDate || ""}
                     className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     onChange={(e) =>
                         handleSubSectionChange(subSectionIndex, "endDate", e.target.value)

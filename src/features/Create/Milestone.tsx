@@ -2,13 +2,7 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import Section from "./Section";
-
-interface SubSection {
-    name: string;
-    startDate: string;
-    endDate: string;
-    description: string;
-}
+import { SubSection } from "../../app/models/create/SubSection";
 
 interface Section {
     name: string;
@@ -34,7 +28,6 @@ interface Props {
         field: keyof Omit<Milestone, "sections">,
         value: string
     ) => void;
-
     deleteMilestone: (milestoneIndex: number) => void;
     addSection: (milestoneIndex: number) => void;
     handleSectionChange: (
@@ -44,11 +37,16 @@ interface Props {
         value: string | SubSection[]
     ) => void;
     deleteSection: (milestoneIndex: number, sectionIndex: number) => void;
+    calculateSectionConstraints: (sectionIndex: number) => { minStartDate: string; maxEndDate: string };
+    calculateMilestoneConstraints: { minStartDate: string; maxEndDate: string };
+
 }
 
 export default function Milestone({
     milestone,
     milestoneIndex,
+    calculateSectionConstraints,
+    calculateMilestoneConstraints,
     handleMilestoneChange,
     deleteMilestone,
     addSection,
@@ -60,11 +58,11 @@ export default function Milestone({
     const [tempDescription, setTempDescription] = useState(milestone.description);
 
     useEffect(() => {
-        setTempDescription(milestone.description);
-    }, [milestone.description]);
+        setTempDescription(milestone.description); 
+    }, [milestone.description]);  
 
     const toggleCollapse = () => setIsCollapsed(!isCollapsed);
-
+ 
     const openDescriptionModal = () => setIsDescriptionModalOpen(true);
     const closeDescriptionModal = () => {
         setTempDescription(milestone.description); // Reset to original if closed without saving
@@ -81,17 +79,17 @@ export default function Milestone({
     };
 
     const handleDeleteMilestone = () => {
-        deleteMilestone(milestoneIndex);
+        deleteMilestone(milestoneIndex); 
     };
- 
+
     return (
         <div key={milestoneIndex} className="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
             <div className="flex items-center gap-x-4">
-                <button type="button"   onClick={toggleCollapse} aria-label={isCollapsed ? "Expand sections" : "Collapse sections"} className="text-blue-500">
+                <button type="button" onClick={toggleCollapse} aria-label={isCollapsed ? "Expand sections" : "Collapse sections"} className="text-blue-500">
                     <FontAwesomeIcon icon={isCollapsed ? faCaretDown : faCaretUp} className="text-xl" />
                 </button>
 
-                <div className="flex-1">
+                <div className="flex-1">  
                     <input
                         type="text"
                         id={`milestoneName-${milestoneIndex}`}
@@ -99,6 +97,7 @@ export default function Milestone({
                         placeholder="Enter milestone name"
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         onChange={(e) => handleMilestoneChange(milestoneIndex, "name", e.target.value)}
+                        required
                     />
                 </div>
 
@@ -108,8 +107,13 @@ export default function Milestone({
                         type="date"
                         id={`startDate-${milestoneIndex}`}
                         value={milestone.startDate}
+                        min={calculateMilestoneConstraints.minStartDate} // Set dynamic minimum start date
+                        max={milestone.endDate || calculateMilestoneConstraints.maxEndDate} // Set maximum as current milestone end date or dynamic max
+                        disabled={milestone.sections.length > 0} // Disable if sections exist
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        onChange={(e) => handleMilestoneChange(milestoneIndex, "startDate", e.target.value)}
+                        onChange={(e) =>
+                            handleMilestoneChange(milestoneIndex, "startDate", e.target.value)
+                        }
                     />
                 </div>
 
@@ -119,16 +123,21 @@ export default function Milestone({
                         type="date"
                         id={`endDate-${milestoneIndex}`}
                         value={milestone.endDate}
+                        min={milestone.startDate || calculateMilestoneConstraints.minStartDate} // Ensure end date is after or equal to start date
+                        max={calculateMilestoneConstraints.maxEndDate} // Set dynamic maximum end date
+                        disabled={milestone.sections.length > 0} // Disable if sections exist
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        onChange={(e) => handleMilestoneChange(milestoneIndex, "endDate", e.target.value)}
+                        onChange={(e) =>
+                            handleMilestoneChange(milestoneIndex, "endDate", e.target.value)
+                        }
                     />
-                </div>
+                </div> 
 
                 <button type="button" onClick={openDescriptionModal} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600">Description</button>
                 <button type="button" onClick={handleDeleteMilestone} className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Delete</button>
                 <button type="button" onClick={() => addSection(milestoneIndex)} className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">+ Section</button>
             </div>
-
+ 
             {!isCollapsed && (
                 <div className="mt-4">
                     {milestone.sections.map((section, sectionIndex) => (
@@ -139,7 +148,8 @@ export default function Milestone({
                             milestoneIndex={milestoneIndex}
                             handleSectionChange={handleSectionChange}
                             deleteSection={deleteSection}
-                        />
+                            calculateSectionConstraints={() => calculateSectionConstraints(sectionIndex)} // Pass as a callback
+                            />
                     ))}
                 </div>
             )}
