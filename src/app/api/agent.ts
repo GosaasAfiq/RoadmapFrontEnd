@@ -70,7 +70,7 @@ const Roadmaps = {
             nearDueCount: number;
             overdueCount: number;
         }>(`/roadmaps?${params.toString()}`);
-    },   
+    },    
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
     create: (data: CreateRoadmapData) => {
