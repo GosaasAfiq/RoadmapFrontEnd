@@ -129,7 +129,7 @@ export default observer(function AuditTrail() {
                         className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto"
                     >
                         Apply
-                    </button>
+                    </button> 
 
                      {/* Pagination Dropdown */}
                     <div>

@@ -9,14 +9,20 @@ export default class RoadmapStore {
     selectedRoadmap: Roadmap | null = null;
     loading = false;
     loadingInitial = false;
-    totalFilterCounts = { all: 0, draft: 0, "not-started": 0, "in-progress" : 0, "completed" : 0}; // Consistent counts
+    totalFilterCounts = { all: 0, draft: 0, "not-started": 0, "in-progress" : 0, "completed" : 0, "near-due" : 0, "overdue" : 0}; // Consistent counts
 
-    filterCounts: { all: number; draft: number; "not-started": number;"in-progress": number; completed: number;  } = {
+    page: number = 1; // Current page
+    pageSize: number = 6; // Number of items per page
+    totalCount: number = 0; 
+
+    filterCounts: { all: number; draft: number; "not-started": number;"in-progress": number; completed: number; "near-due": number; "overdue" : number } = {
         all: 0,
         draft: 0,
         "not-started": 0,
         "in-progress": 0,
         completed: 0,
+        "near-due": 0,
+        "overdue": 0
 
     };
 
@@ -30,17 +36,32 @@ export default class RoadmapStore {
         );
     }
  
-    loadRoadmaps = async (searchTerm?: string, filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed' = 'all') => {
+    loadRoadmaps = async (
+        searchTerm?: string, 
+        filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed'| 'near-due' | 'overdue'  = 'all',
+        page: number = 1,
+        pageSize: number = 6
+    ) => {
         this.loadingInitial = true;
         try {
-            const roadmaps = await agent.Roadmaps.list(searchTerm, filter); // Pass both parameters
-            console.log(roadmaps[0]);
-            
+            // Expecting the updated response structure from agent.Roadmaps.list
+            const { totalCount, items, draftCount, notStartedCount, inProgressCount, completedCount,nearDueCount,overdueCount } = await agent.Roadmaps.list(searchTerm, filter, page, pageSize);
+            const all = totalCount;
+
             runInAction(() => {
-                this.roadmaps = roadmaps;
+                this.roadmaps = items; // Set the paginated roadmaps
+                this.totalCount = totalCount;
+                if (this.filterCounts.all === 0) {
+                    this.filterCounts.all = all; // Set the total count for all roadmaps only once
+                }
+                this.filterCounts.draft = draftCount;
+                this.filterCounts["not-started"] = notStartedCount;
+                this.filterCounts["in-progress"] = inProgressCount;
+                this.filterCounts.completed = completedCount;
+                this.filterCounts["near-due"] =nearDueCount;
+                this.filterCounts["overdue"] = overdueCount;
                 if (!searchTerm && filter === "all") {
-                    this.allRoadmaps = roadmaps; // Cache the complete list
-                    this.updateFilterCounts(); // Update counts based on the full list
+                    this.allRoadmaps = items; // Cache the complete list for filter counts
                 }
             });
             this.loadingInitial = false;
@@ -77,45 +98,14 @@ export default class RoadmapStore {
         } catch (error) {
             console.error("Error creating roadmap:", error);
         }
-    };
-    
-    
-    
+    }; 
 
-    resetFilterCounts = () => {
-        this.filterCounts = {
-            all: 0,
-            draft: 0,
-            "not-started": 0,
-            "in-progress": 0,
-            completed: 0,
-        };
+    setPage = (page: number) => {
+        this.page = page;
     };
 
-    // Helper function to recursively check if any node or sub-node is completed
-    
-
-    updateFilterCounts = () => {
-        this.filterCounts.all = this.allRoadmaps.length;
-        this.filterCounts.draft = this.allRoadmaps.filter((r) => !r.isPublished).length;
-        // "Not Started" filter: No completed nodes in any hierarchy
-        this.filterCounts["not-started"] = this.allRoadmaps.filter((r) =>
-            r.isPublished &&
-            !r.isCompleted &&
-            !this.hasCompletedNode(r.nodes) // Use recursive check for completed nodes
-        ).length;
-
-        // "In Progress" filter: At least one completed node in the hierarchy
-        this.filterCounts["in-progress"] = this.allRoadmaps.filter((r) =>
-            r.isPublished &&
-            !r.isCompleted &&
-            this.hasCompletedNode(r.nodes) // Use recursive check for completed nodes
-        ).length;
-        this.filterCounts.completed = this.allRoadmaps.filter((r) => r.isCompleted).length;
+    setPageSize = (pageSize: number) => {
+        this.pageSize = pageSize;
     };
-
-
-    
-    
-    
+        
 } 

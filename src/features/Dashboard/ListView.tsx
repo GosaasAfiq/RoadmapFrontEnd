@@ -23,8 +23,8 @@ const ListView: React.FC<ListViewProps> = ({ roadmaps }) => (
           <tr key={roadmap.id} className="hover:bg-gray-50">
             <td className="px-6 py-4 text-sm font-medium text-gray-800">{roadmap.roadmapName}</td>
             <td className="px-6 py-4 text-sm text-gray-600">{roadmap.completionRate}</td>
-            <td className="px-6 py-4 text-sm text-gray-600">01/01/2024</td>
-            <td className="px-6 py-4 text-sm text-gray-600">12/31/2024</td>
+            <td className="px-6 py-4 text-sm text-gray-600">{roadmap.startDate}</td>
+            <td className="px-6 py-4 text-sm text-gray-600">{roadmap.endDate}</td>
             <td className="px-6 py-4 text-sm text-gray-600">
               {roadmap.isPublished ? 'Published' : 'Draft'}
             </td>

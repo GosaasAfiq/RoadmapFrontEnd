@@ -49,12 +49,28 @@ const requests = {
 } 
 
 const Roadmaps = {
-    list: (searchTerm?: string, filter: 'all' | 'draft' | 'not-started'| 'in-progress' | 'completed' = 'all') => {
+    list: (
+        searchTerm?: string, 
+        filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed' | 'near-due' | 'overdue' = 'all', 
+        page: number = 1, 
+        pageSize: number = 6
+    ) => {
         const params = new URLSearchParams();
         if (searchTerm) params.append('searchTerm', searchTerm);
-        if (filter !== 'all') params.append('filter', filter); // Add the filt | 'in-progress' | 'completed'er parameter if it's not 'all'
-        return requests.get<Roadmap[]>(`/roadmaps?${params.toString()}`);
-    },     
+        if (filter !== 'all') params.append('filter', filter); // Add the filter parameter if it's not 'all'
+        params.append('page', page.toString());
+        params.append('pageSize', pageSize.toString());
+
+        // Update the response type to include totalCount and items
+        return requests.get<{ totalCount: number; items: Roadmap[];
+            draftCount: number;
+            notStartedCount: number;
+            inProgressCount: number;
+            completedCount: number; 
+            nearDueCount: number;
+            overdueCount: number;
+        }>(`/roadmaps?${params.toString()}`);
+    },   
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
     create: (data: CreateRoadmapData) => {
@@ -63,7 +79,7 @@ const Roadmaps = {
     } 
 };
 
-const AuditTrails = {
+const AuditTrails = { 
     list: (
         searchTerm?: string,
         userFilter?: string,
@@ -81,7 +97,7 @@ const AuditTrails = {
         params.append('pageSize', pageSize.toString());
 
         // Update the type to match the backend result structure
-        return requests.get<{ totalCount: number; items: AuditTrail[] }>(`/audittrail?${params.toString()}`);
+        return requests.get<{totalCount: number; items: AuditTrail[]}>(`/audittrail?${params.toString()}`);
     }
 };
 

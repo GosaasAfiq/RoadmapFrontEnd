@@ -9,7 +9,7 @@ export default class AuditTrailStore {
     loading = false;
     loadingInitial = false;
 
-    allUsers: string[] = [];
+    allUsers: string[] = []; 
     searchTerm: string = '';
     userFilter: string = '';
     startDate: Date | undefined = undefined;

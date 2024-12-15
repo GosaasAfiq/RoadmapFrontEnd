@@ -2,27 +2,30 @@ import { FC, useState, useEffect, useRef } from "react";
 import _ from "lodash"; // Import lodash for debounce
 
 interface FilterProps {
-  filter: "all" | "draft" | "not-started" | "in-progress" | "completed"; // Include new filters
-  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" | "not-started" | "in-progress" | "completed">>;
+  filter: "all" | "draft" | "not-started" | "in-progress" | "completed" | 'near-due' | 'overdue'; // Include new filters
+  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue'>>;
   filterCounts: { 
     all: number; 
     draft: number; 
     "not-started": number; 
     "in-progress": number; 
     completed: number; 
+    'near-due': number;  
+    'overdue':number;
   };
-  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" | "not-started" | "in-progress" | "completed") => void; // Update filter type
+  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue',page: number,pageSize: number) => void; // Update filter type
   searchTerm: string;
+  pageSize: number;
 }
 
-const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps, searchTerm }) => {
+const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps, searchTerm,pageSize }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown 
 
   // Debounced filter change handler
-  const handleFilterChange = _.debounce((newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed") => {
+  const handleFilterChange = _.debounce((newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed"| 'near-due' | 'overdue') => {
     setFilter(newFilter); // Update the filter state
-    loadRoadmaps(searchTerm, newFilter); // Trigger loadRoadmaps with the correct filter
+    loadRoadmaps(searchTerm, newFilter,1, pageSize); // Trigger loadRoadmaps with the correct filter
   }, 500); // Adjust debounce delay as needed
 
   useEffect(() => {
@@ -54,6 +57,8 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps
           {filter === "not-started" && `Not Started (${filterCounts["not-started"]})`}
           {filter === "in-progress" && `In Progress (${filterCounts["in-progress"]})`}
           {filter === "completed" && `Completed (${filterCounts.completed})`}
+          {filter === "near-due" && `Near Due (${filterCounts["near-due"]})`}
+          {filter === "overdue" && `Overdue (${filterCounts["overdue"]})`}
         </span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -106,6 +111,20 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps
           >
             <span>Completed</span>
             <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts.completed}</span>
+          </div>
+          <div
+            className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+            onClick={() => handleFilterChange("near-due")}
+          >
+            <span>Near Due</span>
+            <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts["near-due"]}</span>
+          </div>
+          <div
+            className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+            onClick={() => handleFilterChange("overdue")}
+          >
+            <span>Overdue</span>
+            <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts["overdue"]}</span>
           </div>
         </div>
       )}
