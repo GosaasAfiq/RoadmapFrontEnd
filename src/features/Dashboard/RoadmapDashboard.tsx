@@ -22,25 +22,16 @@ export default observer(function RoadmapDashboard() {
     const [pendingSearchTerm, setPendingSearchTerm] = useState(""); // Tracks input changes
     const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
 
-    const handleSearch = _.debounce(() => {
-        roadmapStore.loadRoadmaps(searchTerm, filter);
-    }, 500);
-
     useEffect(() => {
-        return () => {
-            handleSearch.cancel();  // Cleanup debounce on unmount
-        };
-    }, []);
-
-    useEffect(() => {
-        // Trigger debounced search whenever the confirmed search term or filter changes
-        handleSearch();
-    }, [searchTerm, filter]);
-
+        const debounceLoadRoadmaps = _.debounce(() => {
+            roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize);
+        }, 500);
     
+        debounceLoadRoadmaps();
     
-    
-    
+        // Cleanup debounce on unmount
+        return () => debounceLoadRoadmaps.cancel();
+    }, [searchTerm, filter, pageSize, roadmapStore.page]);
     
     
 
@@ -97,19 +88,19 @@ export default observer(function RoadmapDashboard() {
                 </div>
 
                 <select
-                id="paginationDropdown"
-                value={pageSize}
-                onChange={(e) => {
-                    const newPageSize = parseInt(e.target.value, 10);
-                    setPageSize(newPageSize);
-                    loadRoadmaps(searchTerm, filter, 1, newPageSize); // Use the new page size directly
-                }}
-                className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
-            >
-                <option value="6">6</option>
-                <option value="9">9</option>
-                <option value="12">12</option>
-            </select>
+                    id="paginationDropdown"
+                    value={pageSize}
+                    onChange={(e) => {
+                        const newPageSize = parseInt(e.target.value, 10);
+                        setPageSize(newPageSize); // Let useEffect trigger loadRoadmaps
+                    }}
+                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
+                >
+                    <option value="6">6</option>
+                    <option value="9">9</option>
+                    <option value="12">12</option>
+                </select>
+
 
 
 

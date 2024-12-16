@@ -231,15 +231,15 @@ export default observer(function CreateRoadmap() {
 
             console.log(dataToSend);
             
-            try {
-                // Use the createRoadmap method from the store
-                await store.roadmapStore.createRoadmap(dataToSend!);
-                toast.success("Roadmap created successfully!");
-                // Optionally reset the form or redirect
-            } catch (error) {
-                console.error("Error submitting roadmap:", error);
-                toast.error("An error occurred while creating the roadmap.");
-            }
+            // try {
+            //     // Use the createRoadmap method from the store
+            //     await store.roadmapStore.createRoadmap(dataToSend!);
+            //     toast.success("Roadmap created successfully!");
+            //     // Optionally reset the form or redirect
+            // } catch (error) {
+            //     console.error("Error submitting roadmap:", error);
+            //     toast.error("An error occurred while creating the roadmap.");
+            // }
         
     };
 

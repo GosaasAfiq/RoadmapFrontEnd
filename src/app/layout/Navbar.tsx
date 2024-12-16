@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useStore } from "../stores/store";
+import { store, useStore } from "../stores/store";
 import { useAuth } from "../../hooks/useAuth";
 import { observer } from "mobx-react-lite";
 
@@ -26,9 +26,19 @@ export default observer(function NavBar() {
         }
     };
 
-    const handleLogout = () => {
-        userStore.logout();
-        navigate("/");
+    const handleLogout = async () => {
+
+        if (user) {  // Check if user is not null or undefined
+            const auditTrailData = {
+                userId: user.id,  // Access the userId from the user object
+                action: "User Logged out"
+            };
+    
+            // await store.auditTrailStore.create(auditTrailData);
+    
+            userStore.logout();
+            navigate("/");
+        }
     };
 
     useEffect(() => {
@@ -88,6 +98,11 @@ export default observer(function NavBar() {
                             style={{ top: "100%" }}
                         >
                             <ul className="py-2">
+                                {user && user.username && (
+                                    <li className="px-4 py-2 text-gray-700 font-semibold">
+                                        {user.username} {/* Display the user's name */}
+                                    </li>
+                                )}
                                 <li>
                                     <NavLink
                                         to="audittrail"

@@ -76,7 +76,10 @@ const Roadmaps = {
     create: (data: CreateRoadmapData) => {
         console.log('Data being sent to create roadmap = ', JSON.stringify(data, null, 2)); // Log the data
         return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
-    } 
+    },
+    updatenode: (data:Roadmap) => {
+        return requests.put<Roadmap>('/roadmaps/updatenode',data);
+    }
 };
 
 const AuditTrails = { 
@@ -98,6 +101,9 @@ const AuditTrails = {
 
         // Update the type to match the backend result structure
         return requests.get<{totalCount: number; items: AuditTrail[]}>(`/audittrail?${params.toString()}`);
+    },
+    create: (data: { userId: string, action: string }) => {
+        return requests.post<AuditTrail>('/audittrail', data);
     }
 };
 

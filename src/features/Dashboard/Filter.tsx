@@ -23,16 +23,9 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps
   const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown 
 
   // Debounced filter change handler
-  const handleFilterChange = _.debounce((newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed"| 'near-due' | 'overdue') => {
-    setFilter(newFilter); // Update the filter state
-    loadRoadmaps(searchTerm, newFilter,1, pageSize); // Trigger loadRoadmaps with the correct filter
-  }, 500); // Adjust debounce delay as needed
-
-  useEffect(() => {
-    return () => {
-      handleFilterChange.cancel(); // Cleanup debounce
-    };
-  }, [handleFilterChange]);
+  const handleFilterChange = (newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed"| 'near-due' | 'overdue') => {
+    setFilter(newFilter); 
+  }; // Adjust debounce delay as needed
 
   // Close dropdown when clicked outside
   useEffect(() => {

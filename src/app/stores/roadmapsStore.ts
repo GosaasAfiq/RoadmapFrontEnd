@@ -53,15 +53,12 @@ export default class RoadmapStore {
                 this.totalCount = totalCount;
                 if (this.filterCounts.all === 0) {
                     this.filterCounts.all = all; // Set the total count for all roadmaps only once
-                }
-                this.filterCounts.draft = draftCount;
-                this.filterCounts["not-started"] = notStartedCount;
-                this.filterCounts["in-progress"] = inProgressCount;
-                this.filterCounts.completed = completedCount;
-                this.filterCounts["near-due"] =nearDueCount;
-                this.filterCounts["overdue"] = overdueCount;
-                if (!searchTerm && filter === "all") {
-                    this.allRoadmaps = items; // Cache the complete list for filter counts
+                    this.filterCounts.draft = draftCount;
+                    this.filterCounts["not-started"] = notStartedCount;
+                    this.filterCounts["in-progress"] = inProgressCount;
+                    this.filterCounts.completed = completedCount;
+                    this.filterCounts["near-due"] =nearDueCount;
+                    this.filterCounts["overdue"] = overdueCount;
                 }
             });
             this.loadingInitial = false;
@@ -107,5 +104,27 @@ export default class RoadmapStore {
     setPageSize = (pageSize: number) => {
         this.pageSize = pageSize;
     };
+
+    updateNode = async (roadmapData: Roadmap) => {
+        try {
+            // Send the request to the backend to create the roadmap
+            const updatedRoadmap = await agent.Roadmaps.updatenode(roadmapData);
+    
+            // Process the response, e.g., add the new roadmap to the list
+            runInAction(() => {
+                const index = this.roadmaps.findIndex((roadmap) => roadmap.id === updatedRoadmap.id);
+                if (index > -1) {
+                    this.roadmaps[index] = updatedRoadmap;
+                }
+
+                // Update the selected roadmap if it matches the updated one
+                if (this.selectedRoadmap?.id === updatedRoadmap.id) {
+                    this.selectedRoadmap = updatedRoadmap;
+                }
+            });
+        } catch (error) {
+            console.error("Error creating roadmap:", error);
+        }
+    }; 
         
 } 

@@ -70,6 +70,15 @@ export default class AuditTrailStore {
             });
         }
     };
+
+    create = async (auditTrailData: { userId: string, action: string }) => {
+        try {
+            await agent.AuditTrails.create(auditTrailData);
+            console.log("Audit trail created successfully");
+        } catch (error) {
+            console.error("Failed to create audit trail:", error);
+        }
+    };
     
     
       

@@ -5,8 +5,10 @@ import { useGoogleAuth } from "../../hooks/useGoogleAuth";
 export default observer(function Login() {
     const { handleGoogleLogin } = useGoogleAuth();
 
+
+
     const handleSuccess = (credentialResponse: any) => {
-        handleGoogleLogin(credentialResponse);
+        handleGoogleLogin(credentialResponse);        
     };
 
     const handleError = () => {
