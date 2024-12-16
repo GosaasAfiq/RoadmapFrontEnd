@@ -87,7 +87,7 @@ export default observer(function Detail() {
     }
   }, [selectedRoadmap]);
 
-  const handleNodeClick = (event: any, node: Node) => {
+  const handleNodeClick = (_event: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
     setChecked(false);
     setShowPopup(true);
