@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { store } from "../../app/stores/store";
+import { store, useStore } from "../../app/stores/store";
 import { toast } from "react-toastify";
 import { Section } from "../../app/models/create/Section";
 import { SubSection } from "../../app/models/create/SubSection";
 import Milestone from "./Milestone";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 interface Milestone {
     name: string;
@@ -24,7 +25,11 @@ export default observer(function CreateRoadmap() {
     const [action, setAction] = useState<string | null>(null);
 
 
-    const { userStore } = store;  // Accessing the userStore from the global store
+    const { userStore,roadmapStore } = useStore();  // Accessing the userStore from the global store
+    const {loadingInitial,createRoadmap} = roadmapStore;
+    const navigate = useNavigate();
+
+
     const userId = userStore.user?.id;
     // Function to add a new milestone row
     const addMilestone = () => {
@@ -231,17 +236,28 @@ export default observer(function CreateRoadmap() {
 
             console.log(dataToSend);
             
-            // try {
-            //     // Use the createRoadmap method from the store
-            //     await store.roadmapStore.createRoadmap(dataToSend!);
-            //     toast.success("Roadmap created successfully!");
-            //     // Optionally reset the form or redirect
-            // } catch (error) {
-            //     console.error("Error submitting roadmap:", error);
-            //     toast.error("An error occurred while creating the roadmap.");
-            // }
+            try {
+                // Use the createRoadmap method from the store
+                await createRoadmap(dataToSend!);
+                toast.success(isPublished ? "Roadmap Created!" : "Draft Created!");
+                // Optionally reset the form or redirect
+
+                const auditTrailData = {
+                    userId: userId,  // Access the userId from the user object
+                    action: "Created a roadmap"
+                };
+    
+                // await store.auditTrailStore.create(auditTrailData);
+
+                navigate("/roadmaps");
+            } catch (error) {
+                console.error("Error submitting roadmap:", error);
+                toast.error("An error occurred while creating the roadmap.");
+            }
         
     };
+
+    if (loadingInitial) return <LoadingComponent content="Loading..." />
 
 
     return (

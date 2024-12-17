@@ -83,6 +83,7 @@ export default class RoadmapStore {
     }; 
 
     createRoadmap = async (roadmapData: CreateRoadmapData) => {
+        this.loading = true;
         try {
             // Send the request to the backend to create the roadmap
             const createdRoadmap = await agent.Roadmaps.create(roadmapData);
@@ -92,8 +93,10 @@ export default class RoadmapStore {
                 this.roadmaps.push(createdRoadmap); // Add to roadmaps list
                 this.selectedRoadmap = createdRoadmap; // Optionally set as selected
             });
+            this.loading = false;
         } catch (error) {
             console.error("Error creating roadmap:", error);
+            this.loading = false;
         }
     }; 
 
@@ -126,5 +129,33 @@ export default class RoadmapStore {
             console.error("Error creating roadmap:", error);
         }
     }; 
+
+    deleteRoadmap = async (data: { id: string, isDeleted: boolean }) => {
+        try {
+            // Perform a soft delete by marking the roadmap as deleted
+            await agent.Roadmaps.deleteRoadmap(data);
+    
+            // Optionally, update the local state after soft deletion
+            runInAction(() => {
+                // Find the index of the roadmap to mark as deleted
+                const index = this.roadmaps.findIndex((roadmap) => roadmap.id === data.id);
+                
+                if (index !== -1) {
+                    // Update the roadmap in local state by marking it as deleted
+                    this.roadmaps[index].isDeleted = data.isDeleted;  // Ensure you update the flag in the state
+                }
+    
+                // Optionally update the selectedRoadmap if it's the same as the one deleted
+                if (this.selectedRoadmap?.id === data.id) {
+                    this.selectedRoadmap.isDeleted = data.isDeleted;
+                }
+            });
+        } catch (error) {
+            console.error("Error marking roadmap as deleted:", error);
+            throw new Error("Failed to mark roadmap as deleted.");
+        }
+    };
+    
+    
         
 } 

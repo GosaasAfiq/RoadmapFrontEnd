@@ -1,10 +1,13 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { observer } from "mobx-react-lite";
 import { useGoogleAuth } from "../../hooks/useGoogleAuth";
+import { useStore } from "../../app/stores/store";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default observer(function Login() {
     const { handleGoogleLogin } = useGoogleAuth();
-
+    const {roadmapStore} = useStore();
+    const {loadingInitial} = roadmapStore;
 
 
     const handleSuccess = (credentialResponse: any) => {
@@ -14,6 +17,9 @@ export default observer(function Login() {
     const handleError = () => {
         console.error("Google Login Failed");
     };
+
+    if (loadingInitial) return <LoadingComponent content="Loading..." />
+    
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 relative">

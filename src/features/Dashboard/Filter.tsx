@@ -18,7 +18,7 @@ interface FilterProps {
   pageSize: number;
 }
 
-const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts, loadRoadmaps, searchTerm,pageSize }) => {
+const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown 
 

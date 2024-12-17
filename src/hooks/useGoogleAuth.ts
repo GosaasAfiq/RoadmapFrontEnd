@@ -41,14 +41,13 @@ export const useGoogleAuth = () => {
 
             // Save the user and redirect
             login(user);
-            console.log("Redirecting to /roadmaps"); // <-- Added log
-            //HERE
+
             const auditTrailData = {
                 userId: user.id,  // Access the userId from the user object
                 action: "User logged in"
             };
 
-            // await store.auditTrailStore.create(auditTrailData);
+            await store.auditTrailStore.create(auditTrailData);
 
             
 

@@ -74,11 +74,17 @@ const Roadmaps = {
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
     create: (data: CreateRoadmapData) => {
-        console.log('Data being sent to create roadmap = ', JSON.stringify(data, null, 2)); // Log the data
+        // console.log('Data being sent to create roadmap = ', JSON.stringify(data, null, 2)); // Log the data
         return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
     },
     updatenode: (data:Roadmap) => {
-        return requests.put<Roadmap>('/roadmaps/updatenode',data);
+        const wrappedRoadmap =  { roadmap: data };
+        // console.log('Sending data to backend:', JSON.stringify(wrappedRoadmap, null, 2));
+        return requests.put<Roadmap>('/roadmaps/updatenode',wrappedRoadmap);
+    },
+    deleteRoadmap: (data: { id: string, isDeleted: boolean }) => {
+        console.log('Sending data to backend:', JSON.stringify(data, null, 2));
+        return requests.put<Roadmap>('/roadmaps/deleteroadmap', data);  // Send id and isDeleted flag
     }
 };
 

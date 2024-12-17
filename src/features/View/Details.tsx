@@ -7,20 +7,26 @@ import ReactFlow, {
   ReactFlowProvider,
 } from "react-flow-renderer";
 import { observer } from "mobx-react-lite";
-import { useParams } from "react-router-dom";
-import { useStore } from "../../app/stores/store";
+import { useNavigate, useParams } from "react-router-dom";
+import { store, useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { getLayoutedElements } from "./Dagre";
 import { Roadmap } from "../../app/models/roadmap";
+import { toast } from "react-toastify";
 
 export default observer(function Detail() {
   const { id } = useParams<{ id: string }>();
-  const { roadmapStore } = useStore();
-  const { selectedRoadmap, loadRoadmap, loading } = roadmapStore;
+  const { roadmapStore,userStore } = useStore();
+  const { selectedRoadmap, loadRoadmap, loading,updateNode } = roadmapStore;
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  const navigate = useNavigate(); // For navigation
+  const userId = userStore.user?.id;
+
+
 
   useEffect(() => {
     if (id) loadRoadmap(id);
@@ -96,36 +102,7 @@ export default observer(function Detail() {
         ...selectedNode,
         data: { ...selectedNode.data, isCompleted: !selectedNode.data.isCompleted },
       };
-
-      // const updateParentIfAllChildrenCompleted = (parentId: string) => {
-      //   console.log("Updating parent:", parentId);
-      //   setNodes((prevNodes) => {
-      //     const parentNode = prevNodes.find((node) => node.id === parentId);
-      //     if (!parentNode){
-      //       console.log("Parent node not found");
-      //       return prevNodes;
-      //     } 
   
-      //     const childNodes = prevNodes.filter((node) => node.data.parentId === parentId);
-      //     const allChildrenCompleted = childNodes.every((childNode) => childNode.data.isCompleted);
-
-      //     console.log("All children completed for parent", parentId, ":", allChildrenCompleted);
-
-      //     if (allChildrenCompleted && !parentNode.data.isCompleted) {
-      //       const updatedParent = {
-      //         ...parentNode,
-      //         data: { ...parentNode.data, isCompleted: true },
-      //       };
-      //       console.log("Parent marked as completed:", updatedParent);
-      //       return prevNodes.map((node) =>
-      //         node.id === parentId ? updatedParent : node
-      //       );
-      //     }
-      //     return prevNodes;
-      //   });
-      // };
-  
-
       const updateChildren = (nodeId: string, isCompleted: boolean) => {
         setNodes((prevNodes) =>
           prevNodes.map((node) => {
@@ -152,14 +129,6 @@ export default observer(function Detail() {
       if (updatedNode.data.isCompleted) {
         updateChildren(updatedNode.id, true);  // Mark children as completed
       }
-  
-      // Update parent if all children are completed
-      // if (!updatedNode.data.isCompleted) {
-      //   const parentId = updatedNode.data.parentId;
-      //   if (parentId) updateParentIfAllChildrenCompleted(parentId);
-      // }
-
-
         setSelectedNode(updatedNode); // Update the local selectedNode state
     }
   };
@@ -175,39 +144,75 @@ export default observer(function Detail() {
     }
 
     if (selectedRoadmap) {
-      // Prepare updated roadmap object
-      const updatedRoadmap: Roadmap = {
+      
+      const updatedNodes = nodes.map((node) => ({
+        id: node.id,
+        name: node.data.label,
+        description: node.data.description,
+        startDate: node.data.startDate,
+        endDate: node.data.endDate,
+        isCompleted: node.data.isCompleted,
+        parentId: node.data.parentId,
+        roadmapId: selectedRoadmap.id,
+      }));
+
+      if (!selectedRoadmap.id) {
+        throw new Error("Roadmap ID is missing.");
+      }
+  
+      // Build the complete roadmap object
+      const updatedRoadmap = {
         id: selectedRoadmap.id,
-        userId: selectedRoadmap.userId,
-        roadmapName: selectedRoadmap.roadmapName,
         isPublished: selectedRoadmap.isPublished,
         isCompleted: selectedRoadmap.isCompleted,
-        isDeleted: selectedRoadmap.isDeleted, // Optional
-        createdAt: selectedRoadmap.createdAt,
-        updatedAt: new Date().toISOString(), // Set updated date to now
-        startDate: selectedRoadmap.startDate,
-        endDate: selectedRoadmap.endDate,
-        completionRate: selectedRoadmap.completionRate,
-        user: selectedRoadmap.user, // Include user if available
-        nodes: nodes.map((node) => ({
-            id: node.id,
-            name: node.data.label,
-            description: node.data.description,
-            isCompleted: node.data.isCompleted,
-            startDate: node.data.startDate,
-            endDate: node.data.endDate,
-            parentId: node.data.parentId,
-            roadmapId: selectedRoadmap.id, // Use the selected roadmap's ID
-        })),
+        nodes: updatedNodes,
+      } as Roadmap; // Assert as Roadmap
+
+      const auditTrailData = {
+        userId: userId ?? "unknown", // Use a fallback value if userId is undefined
+        action: "Marked node as complete"
     };
+  
+    // await store.auditTrailStore.create(auditTrailData);
 
-      // Send the updated roadmap JSON to the backend
-      console.log("Updated Roadmap:", updatedRoadmap);
+      await updateNode(updatedRoadmap);
 
-      // Example: Use fetch/axios to send the data to your backend
-      // await store.roadmapStore.updateNode(updatedRoadmap);
+      loadRoadmap(selectedRoadmap.id); 
     }
   };
+
+  const handleDeleteRoadmap = async (roadmapId: string) => {
+    const confirmDelete = window.confirm(
+        "Are you sure you want to delete this roadmap? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    const data = {
+        id: roadmapId,
+        isDeleted: true
+    };
+    console.log(data);
+
+    const auditTrailData = {
+      userId: userId ?? "unknown", // Use a fallback value if userId is undefined
+      action: "Deleted a roadmap"
+  };
+
+  // await store.auditTrailStore.create(auditTrailData);
+
+    // Send the data to the store to handle the delete logic
+    await roadmapStore.deleteRoadmap(data);
+
+    // Show toast notification
+    toast.success("Roadmap deleted successfully!");
+
+    // Redirect to the roadmaps dashboard
+    navigate("/roadmaps");
+};
+
+  
+
 
   const handleClosePopup = () => {
     setShowPopup(false);
@@ -257,7 +262,7 @@ export default observer(function Detail() {
         </button>
 
         <button
-            // onClick={() => handleDeleteRoadmap(selectedRoadmap.id)} // Add a delete handler
+            onClick={() => handleDeleteRoadmap(selectedRoadmap.id)}
             className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600"
           >
             Delete

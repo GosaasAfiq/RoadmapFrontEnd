@@ -72,11 +72,14 @@ export default class AuditTrailStore {
     };
 
     create = async (auditTrailData: { userId: string, action: string }) => {
+        this.loadingInitial = true;
         try {
             await agent.AuditTrails.create(auditTrailData);
             console.log("Audit trail created successfully");
+            this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to create audit trail:", error);
+            this.loadingInitial = false;
         }
     };
     
