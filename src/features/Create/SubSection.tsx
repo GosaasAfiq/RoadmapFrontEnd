@@ -18,8 +18,9 @@ interface SubSectionProps {
         value: string
     ) => void;
     deleteSubSection: (subSectionIndex: number) => void;
-    minStartDate: string;  // New prop
-    maxEndDate: string;    // New prop
+    minStartDate: string;  
+    maxEndDate: string;    
+    isPublished:boolean;
 }
 
 export default function SubSection({
@@ -27,9 +28,9 @@ export default function SubSection({
     subSectionIndex,
     handleSubSectionChange,
     deleteSubSection,
-    minStartDate,  // New prop
-    maxEndDate,  // New prop
-
+    minStartDate,  
+    maxEndDate,  
+    isPublished,
 }: SubSectionProps) {
     const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
     const [tempDescription, setTempDescription] = useState(subSection.description);
@@ -68,6 +69,7 @@ export default function SubSection({
                     placeholder="Enter subsection name"
                     className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     required
+                    disabled={isPublished}
                     onChange={(e) =>
                         handleSubSectionChange(subSectionIndex, "name", e.target.value)
                     }
@@ -103,22 +105,26 @@ export default function SubSection({
             </div>
 
             {/* Description Button */}
-            <button
-                type="button"  
-                onClick={openDescriptionModal}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
-            >
-                Description
-            </button>
+            {!isPublished && (
+            <>
+                <button
+                    type="button"  
+                    onClick={openDescriptionModal}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
+                >
+                    Description
+                </button>
 
-            {/* Delete SubSection Button */}
-            <button
-                type="button"  
-                onClick={() => deleteSubSection(subSectionIndex)}
-                className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
-            >
-                Delete
-            </button>
+                {/* Delete SubSection Button */}
+                <button
+                    type="button"  
+                    onClick={() => deleteSubSection(subSectionIndex)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
+                >
+                    Delete
+                </button>
+            </>
+            )}
 
             {/* Description Modal */}
             {isDescriptionModalOpen && (

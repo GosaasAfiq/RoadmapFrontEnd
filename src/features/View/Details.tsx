@@ -7,7 +7,7 @@ import ReactFlow, {
   ReactFlowProvider,
 } from "react-flow-renderer";
 import { observer } from "mobx-react-lite";
-import { useNavigate, useParams } from "react-router-dom";
+import { NavLink, useNavigate, useParams } from "react-router-dom";
 import { store, useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { getLayoutedElements } from "./Dagre";
@@ -317,12 +317,12 @@ export default observer(function Detail() {
         </div>
 
         {/* Edit Date Button on the Right */}
-        <button
-          onClick={() => console.log('Edit Date Clicked')} // Add functionality to edit date
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600"
-        >
-          Edit Date
-        </button>
+        <NavLink
+            to={`/edit/${selectedRoadmap.id}`} // Navigate to Detail page
+            className="border border-green-500 text-green-500 rounded-md px-4 py-1 hover:bg-green-500 hover:text-white transition"
+          >
+            Edit
+        </NavLink>
       </div>
 
       {/* Node Completion Progress Bar */}

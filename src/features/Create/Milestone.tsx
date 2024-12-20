@@ -43,6 +43,7 @@ interface Props {
     deleteSection: (milestoneIndex: number, sectionIndex: number) => void;
     calculateSectionConstraints: (sectionIndex: number) => { minStartDate: string; maxEndDate: string };
     calculateMilestoneConstraints: { minStartDate: string; maxEndDate: string };
+    isPublished: boolean;
 
 }
 
@@ -56,6 +57,7 @@ export default function Milestone({
     addSection,
     handleSectionChange,
     deleteSection,
+    isPublished,
 }: Props) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -102,6 +104,7 @@ export default function Milestone({
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         onChange={(e) => handleMilestoneChange(milestoneIndex, "name", e.target.value)}
                         required
+                        disabled={isPublished}  
                     />
                 </div>
 
@@ -136,10 +139,13 @@ export default function Milestone({
                         }
                     />
                 </div> 
-
-                <button type="button" onClick={openDescriptionModal} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600">Description</button>
-                <button type="button" onClick={handleDeleteMilestone} className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Delete</button>
-                <button type="button" onClick={() => addSection(milestoneIndex)} className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">+ Section</button>
+                {!isPublished && (
+                <>
+                    <button type="button" onClick={openDescriptionModal} className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600">Description</button>
+                    <button type="button" onClick={handleDeleteMilestone} className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600">Delete</button>
+                    <button type="button" onClick={() => addSection(milestoneIndex)} className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">+ Section</button>
+                </>
+                )}
             </div>
  
             {!isCollapsed && (
@@ -153,6 +159,7 @@ export default function Milestone({
                             handleSectionChange={handleSectionChange}
                             deleteSection={deleteSection}
                             calculateSectionConstraints={() => calculateSectionConstraints(sectionIndex)} // Pass as a callback
+                            isPublished={isPublished}
                             />
                     ))}
                 </div>

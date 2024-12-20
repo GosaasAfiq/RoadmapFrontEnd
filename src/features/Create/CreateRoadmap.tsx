@@ -35,10 +35,12 @@ export default observer(function CreateRoadmap() {
     const {id} = useParams();
     let createdAt ="";
     let roadmapId = "";
+    let isPublished = false;
     
     if(id){
         roadmapId = selectedRoadmap?.id || "";
-        createdAt = selectedRoadmap?.createdAt || ""
+        createdAt = selectedRoadmap?.createdAt || "";
+        isPublished = selectedRoadmap?.isPublished || false;
 ;    }
     
 // useEffect(() => {
@@ -388,7 +390,7 @@ export default observer(function CreateRoadmap() {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-gray-800 p-8">Create Roadmap</h1>
+            <h1 className="text-2xl font-bold text-gray-800 p-8"> {id ? "Edit Roadmap" : "Create Roadmap"}</h1>
 
             {/* Outer Box (Full Screen) */}
             <div className="flex-grow bg-white p-8 rounded-lg shadow-lg mx-8 relative">
@@ -404,20 +406,25 @@ export default observer(function CreateRoadmap() {
                                 onChange={(e) => setRoadmapName(e.target.value)}
                                 placeholder="Enter roadmap name"
                                 className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                disabled={isPublished}  
                             />
                         </div>
 
                         {/* Buttons */}
                         <div className="flex gap-4">
-                            <button type="button"  className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">
-                                Preview
-                            </button>
-                            <button type="button"  
-                                onClick={addMilestone}
-                                className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600"
-                            >
-                                + Milestone
-                            </button>
+                            {!isPublished && (
+                            <>
+                                <button type="button"  className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">
+                                    Preview
+                                </button>
+                                <button type="button"  
+                                    onClick={addMilestone}
+                                    className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600"
+                                >
+                                    + Milestone
+                                </button>
+                            </>
+                            )}
                         </div>
                     </div>
 
@@ -438,30 +445,49 @@ export default observer(function CreateRoadmap() {
                                 calculateMilestoneConstraints={calculateMilestoneConstraints(milestoneIndex)} // Pass the constraints
                                 handleSectionChange={handleSectionChange}
                                 deleteSection={deleteSection}
+                                isPublished={isPublished}
                             />
                         ))}
                     </div>
 
                     {/* Action Buttons (Cancel, Save, Publish) */}
                     <div className="flex justify-end gap-4">
-                        <NavLink to="/roadmaps">
-                            <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
-                                Cancel
+                        {isPublished && (
+                        <>
+                            <NavLink to={`/roadmaps/${selectedRoadmap!.id}`}>
+                                <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
+                                    Cancel
+                                </button>
+                            </NavLink>
+                            <button 
+                                type="submit"
+                                onClick={() => setAction("publish")}
+                                className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
+                                    Update
                             </button>
-                        </NavLink>
-                        <button
-                            type="submit" // Change to type "submit" to trigger form submission
-                            onClick={() => setAction("save")}
-                            className="bg-yellow-500 text-white px-6 py-2 rounded-md shadow hover:bg-yellow-600"
-                        >
-                            Save
-                        </button>
-                        <button 
-                        type="submit"
-                        onClick={() => setAction("publish")}
-                        className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
-                            Publish
-                        </button>
+                        </>
+                        )}
+                        {!isPublished && (
+                        <>
+                            <NavLink to="/roadmaps">
+                                <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
+                                    Cancel
+                                </button>
+                            </NavLink>
+                            <button
+                                type="submit" // Change to type "submit" to trigger form submission
+                                onClick={() => setAction("save")}
+                                className="bg-yellow-500 text-white px-6 py-2 rounded-md shadow hover:bg-yellow-600">
+                                    Save
+                            </button>
+                            <button 
+                                type="submit"
+                                onClick={() => setAction("publish")}
+                                className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
+                                    Publish
+                            </button>
+                        </>
+                        )}
                     </div>
                 </form>
             </div>

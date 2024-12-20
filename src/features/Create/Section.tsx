@@ -34,7 +34,7 @@ interface Props {
     ) => void;
     deleteSection: (milestoneIndex: number, sectionIndex: number) => void;
     calculateSectionConstraints: () => { minStartDate: string; maxEndDate: string };
-
+    isPublished: boolean;
 }
 
 export default function Section({
@@ -44,6 +44,7 @@ export default function Section({
     calculateSectionConstraints,
     handleSectionChange,
     deleteSection,
+    isPublished,
 }: Props) {
     const [isSubSectionsCollapsed, setIsSubSectionsCollapsed] = useState(false);
     const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
@@ -194,6 +195,7 @@ export default function Section({
                         placeholder="Enter section name"
                         className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         required
+                        disabled={isPublished}
                         onChange={(e) =>
                             handleSectionChange(
                                 milestoneIndex,
@@ -261,31 +263,35 @@ export default function Section({
                 </div>
 
                 {/* Description Button */}
-                <button
-                    type="button"  
-                    onClick={openDescriptionModal}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
-                >
-                    Description
-                </button>
+                {!isPublished && (
+                <>
+                    <button
+                        type="button"  
+                        onClick={openDescriptionModal}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600"
+                    >
+                        Description
+                    </button>
 
-                {/* Delete Section Button */}
-                <button
-                    type="button"  
-                    onClick={() => deleteSection(milestoneIndex, sectionIndex)}
-                    className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
-                >
-                    Delete
-                </button>
+                    {/* Delete Section Button */}
+                    <button
+                        type="button"  
+                        onClick={() => deleteSection(milestoneIndex, sectionIndex)}
+                        className="bg-red-500 text-white px-4 py-2 rounded-md shadow hover:bg-red-600"
+                    >
+                        Delete
+                    </button>
 
-                {/* Add SubSection Button */}
-                <button
-                    type="button"  
-                    onClick={addSubSection}
-                    className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600"
-                >
-                    + SubSection
-                </button>
+                    {/* Add SubSection Button */}
+                    <button
+                        type="button"  
+                        onClick={addSubSection}
+                        className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600"
+                    >
+                        + SubSection
+                    </button>
+                </>
+                )}
             </div>
 
             {/* SubSections (Only visible if not collapsed) */}
@@ -300,6 +306,7 @@ export default function Section({
                             maxEndDate={getMaxEndDate(subSectionIndex)}   
                             handleSubSectionChange={handleSubSectionChange}
                             deleteSubSection={deleteSubSection}
+                            isPublished={isPublished}
                         />
                     ))}
                 </div>
