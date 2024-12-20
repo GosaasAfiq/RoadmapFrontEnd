@@ -7,11 +7,11 @@ import { store, StoreContext } from "./app/stores/store";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  // <StrictMode>
     <GoogleOAuthProvider clientId="767693788852-hl2suntdl6ps601orq0h1tst6shvluti.apps.googleusercontent.com">
       <StoreContext.Provider value={store}>
         <RouterProvider router={router} />
       </StoreContext.Provider>
     </GoogleOAuthProvider>
-  </StrictMode>
+  // </StrictMode> 
 );

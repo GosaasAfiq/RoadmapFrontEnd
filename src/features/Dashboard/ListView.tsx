@@ -1,5 +1,6 @@
 import React from 'react';
 import { Roadmap } from "../../app/models/roadmap"; // Ensure correct path to the roadmap model
+import { NavLink } from 'react-router-dom';
 
 interface ListViewProps {
   roadmaps: Roadmap[];
@@ -30,9 +31,19 @@ const ListView: React.FC<ListViewProps> = ({ roadmaps }) => (
             </td>
             <td className="px-6 py-4 text-sm text-gray-600">
               {roadmap.isPublished ? (
-                <button className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition">View</button>
+                <NavLink
+                to={`/roadmaps/${roadmap.id}`} // Navigate to Detail page
+                className="border border-green-500 text-green-500 rounded-md px-4 py-1 hover:bg-green-500 hover:text-white transition"
+              >
+                View
+              </NavLink>
               ) : (
-                <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Edit</button>
+                <NavLink
+                  to={`/edit/${roadmap.id}`} // Navigate to Detail page
+                  className="border border-green-500 text-green-500 rounded-md px-4 py-1 hover:bg-green-500 hover:text-white transition"
+                >
+                  Edit
+                </NavLink>
               )}
             </td>
           </tr>

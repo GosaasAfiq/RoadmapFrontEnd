@@ -34,7 +34,7 @@ export default observer(function NavBar() {
                 action: "User Logged out"
             };
     
-            await store.auditTrailStore.create(auditTrailData);
+            // await store.auditTrailStore.create(auditTrailData);
     
             userStore.logout();
             navigate("/");

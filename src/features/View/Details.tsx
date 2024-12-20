@@ -31,6 +31,7 @@ export default observer(function Detail() {
   useEffect(() => {
     if (id) loadRoadmap(id);
   }, [id, loadRoadmap]);
+  
 
   useEffect(() => {
     if (selectedRoadmap && selectedRoadmap.nodes) {

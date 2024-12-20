@@ -1,17 +1,20 @@
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { store, useStore } from "../../app/stores/store";
 import { toast } from "react-toastify";
 import { Section } from "../../app/models/create/Section";
 import { SubSection } from "../../app/models/create/SubSection";
 import Milestone from "./Milestone";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { isEqual } from "lodash";
 
 interface Milestone {
+    id:string;
     name: string;
     startDate: string;
     endDate: string;
+    createAt: string;
     description: string;
     sections: Section[];
 }
@@ -21,23 +24,105 @@ export default observer(function CreateRoadmap() {
     // State to hold the list of milestones
     const [roadmapName, setRoadmapName] = useState("");
     const [milestones, setMilestones] = useState<Milestone[]>([]);
-
     const [action, setAction] = useState<string | null>(null);
-
-
     const { userStore,roadmapStore } = useStore();  // Accessing the userStore from the global store
-    const {loadingInitial,createRoadmap} = roadmapStore;
+    const {loadingInitial,createRoadmap,loadRoadmap,selectedRoadmap,updateRoadmap} = roadmapStore;
     const navigate = useNavigate();
+    const userId = userStore.user?.id; 
+    const location = useLocation(); // Use useLocation to track the current path
 
 
-    const userId = userStore.user?.id;
+    const {id} = useParams();
+    let createdAt ="";
+    let roadmapId = "";
+    
+    if(id){
+        roadmapId = selectedRoadmap?.id || "";
+        createdAt = selectedRoadmap?.createdAt || ""
+;    }
+    
+// useEffect(() => {
+//     if (location.pathname === "/create") {
+//         const hasReloaded = sessionStorage.getItem("hasReloaded");
+//         if (!hasReloaded) {
+//             sessionStorage.setItem("hasReloaded", "true");
+//             window.location.reload(); // Force a page reload
+//         }
+//     }
+// }, [location.pathname]);
+
+
+
+    useEffect(() => {
+        if (id) {
+            console.log("Roadmap ID:", id);
+            loadRoadmap(id); // Load the roadmap data when the ID is present (editing)
+        } else {
+            // Reset the state when the ID is not present (creating a new roadmap)
+            setRoadmapName("");
+            setMilestones([]);
+        }
+    }, [id, loadRoadmap]); // Trigger the effect whenever `id` changes
+    
+    
+        const formatDateForInput = (dateString: string | null) => {
+            if (!dateString) return ""; // Handle null or empty dates
+            return new Date(dateString).toISOString().split("T")[0];
+        };
+
+    useEffect(() => {
+            if (selectedRoadmap) {
+                setRoadmapName((prev) => (prev !== selectedRoadmap.roadmapName ? selectedRoadmap.roadmapName || "" : prev));
+        
+                if (selectedRoadmap.nodes) {
+                    const mappedMilestones = selectedRoadmap.nodes
+                        .filter((node) => node.parentId === null)
+                        .map((milestone) => {
+                            return {
+                                id : milestone.id,
+                                name: milestone.name,
+                                startDate: formatDateForInput(milestone.startDate),
+                                endDate: formatDateForInput(milestone.endDate),
+                                createAt: formatDateForInput(milestone.createAt),
+                                description: milestone.description || "",
+                                sections: (milestone.children || []).map((section) => {    
+                                    return {
+                                        id: section.id,
+                                        name: section.name,
+                                        startDate: formatDateForInput(section.startDate),
+                                        endDate: formatDateForInput(section.endDate),
+                                        createAt: formatDateForInput(section.createAt),
+                                        description: section.description || "",
+                                        subSections: (section.children || []).map((subsection) => ({
+                                            id: subsection.id,
+                                            name: subsection.name,
+                                            startDate: formatDateForInput(subsection.startDate),
+                                            endDate: formatDateForInput(subsection.endDate),
+                                            createAt: formatDateForInput(subsection.createAt),
+                                            description: subsection.description || "",
+                                        })),
+                                    };
+                                }),
+                            };
+                        });
+        
+                    if (!isEqual(milestones, mappedMilestones)) {
+                        setMilestones(mappedMilestones);
+                    }
+                }
+            }
+            
+        }, [selectedRoadmap]);
+
     // Function to add a new milestone row
     const addMilestone = () => {
         setMilestones([
             ...milestones,
-            { name: "", startDate: "", endDate: "", description: "", sections: [] }, // Add description here
+            { id:"",name: "", startDate: "", endDate: "", createAt: "", description: "", sections: [] }, // Add description here
         ]);
     };
+    
+    console.log("Selected roadmap:", selectedRoadmap);
     
 
     // Function to handle input changes for milestone fields
@@ -73,9 +158,11 @@ export default observer(function CreateRoadmap() {
     const addSection = (milestoneIndex: number) => {
         const updatedMilestones = [...milestones];
         updatedMilestones[milestoneIndex].sections.push({
+            id:"",
             name: "",
             startDate: "",
             endDate: "",
+            createAt: "",
             description: "",
             subSections: [] // Initialize subSections as an empty array
         });
@@ -227,9 +314,11 @@ export default observer(function CreateRoadmap() {
 
             const dataToSend = {
                 roadmap: { // Wrap the data under "roadmap"
+                    id:roadmapId,
                     name: roadmapName,
                     userId: userId,
                     isPublished: isPublished, //false
+                    createdAt: createdAt,
                     milestones: milestones,
                 },
             }; 
@@ -237,19 +326,55 @@ export default observer(function CreateRoadmap() {
             console.log(dataToSend);
             
             try {
-                // Use the createRoadmap method from the store
-                await createRoadmap(dataToSend!);
-                toast.success(isPublished ? "Roadmap Created!" : "Draft Created!");
-                // Optionally reset the form or redirect
+                if (id) {
+                    if (isPublished) {
+                        await updateRoadmap(dataToSend!);
 
-                const auditTrailData = {
-                    userId: userId,  // Access the userId from the user object
-                    action: "Created a roadmap"
-                };
-    
-                // await store.auditTrailStore.create(auditTrailData);
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Created a roadmap"
+                        };
 
-                navigate("/roadmaps");
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    } else {
+                        await updateRoadmap(dataToSend!);
+
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Updated a draft"
+                        };
+
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    }
+                } else {
+                    if (isPublished) {                        
+                        await createRoadmap(dataToSend!);
+
+                        toast.success( "Roadmap Created!");
+
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Created a roadmap"
+                        };
+
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    } else {                        
+                        await createRoadmap(dataToSend!);
+
+                        toast.success( "Draft Created!");
+
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Created a draft"
+                        };
+
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    }
+                }
             } catch (error) {
                 console.error("Error submitting roadmap:", error);
                 toast.error("An error occurred while creating the roadmap.");

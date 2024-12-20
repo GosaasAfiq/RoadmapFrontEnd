@@ -14,7 +14,8 @@ export const routes: RouteObject[] = [
         children:[
             {path: '', element:<Login/>},
             {path: 'roadmaps', element:<RoadmapDashboard/>},
-            {path: 'create', element:<CreateRoadmap/>}, 
+            {path: 'create', element:<CreateRoadmap key="create"/>}, 
+            {path: 'edit/:id', element:<CreateRoadmap key="edit"/>}, 
             {path: 'audittrail', element:<AuditTrail/>},
             { path: 'roadmaps/:id', element: <Details /> },
         ]

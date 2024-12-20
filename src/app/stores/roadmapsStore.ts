@@ -19,7 +19,7 @@ export default class RoadmapStore {
         all: 0,
         draft: 0,
         "not-started": 0,
-        "in-progress": 0,
+        "in-progress": 0, 
         completed: 0,
         "near-due": 0,
         "overdue": 0
@@ -69,21 +69,21 @@ export default class RoadmapStore {
     };
  
     loadRoadmap = async (id: string) => {
-        this.loading = true;
+        this.loadingInitial = true;
         try {
             const roadmap = await agent.Roadmaps.details(id); // Assume `agent.Roadmaps.details` fetches the roadmap by ID
             runInAction(() => {
                 this.selectedRoadmap = roadmap; // Set the fetched roadmap as selected
             });
-            this.loading = false;
+            this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to load the roadmap:", error);
-            this.loading = false;
+            this.loadingInitial = false;
         }
     }; 
 
     createRoadmap = async (roadmapData: CreateRoadmapData) => {
-        this.loading = true;
+        this.loadingInitial = true;
         try {
             // Send the request to the backend to create the roadmap
             const createdRoadmap = await agent.Roadmaps.create(roadmapData);
@@ -93,10 +93,10 @@ export default class RoadmapStore {
                 this.roadmaps.push(createdRoadmap); // Add to roadmaps list
                 this.selectedRoadmap = createdRoadmap; // Optionally set as selected
             });
-            this.loading = false;
+            this.loadingInitial = false;
         } catch (error) {
             console.error("Error creating roadmap:", error);
-            this.loading = false;
+            this.loadingInitial = false;
         }
     }; 
 
@@ -130,6 +130,8 @@ export default class RoadmapStore {
         }
     }; 
 
+    
+
     deleteRoadmap = async (data: { id: string, isDeleted: boolean }) => {
         try {
             // Perform a soft delete by marking the roadmap as deleted
@@ -155,6 +157,28 @@ export default class RoadmapStore {
             throw new Error("Failed to mark roadmap as deleted.");
         }
     };
+
+    updateRoadmap = async (roadmapData: CreateRoadmapData) => {
+        this.loadingInitial = true;
+        try {
+            const updatedRoadmap = await agent.Roadmaps.updateRoadmap(roadmapData);
+            runInAction(() => {
+                const index = this.roadmaps.findIndex((roadmap) => roadmap.id === updatedRoadmap.id);
+                if (index > -1) {
+                    this.roadmaps[index] = updatedRoadmap;
+                }
+                if (this.selectedRoadmap?.id === updatedRoadmap.id) {
+                    this.selectedRoadmap = updatedRoadmap;
+                }
+            });
+            this.loadingInitial = false;
+        } catch (error) {
+            console.error("Error updating roadmap:", error);
+            this.loadingInitial = false;
+        }
+    };
+    
+    
     
     
         

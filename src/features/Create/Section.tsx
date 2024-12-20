@@ -4,16 +4,20 @@ import { faCaretDown, faCaretUp } from "@fortawesome/free-solid-svg-icons";
 import SubSection from "./SubSection";
 
 interface SubSection {
+    id:string;
     name: string;
     startDate: string;
     endDate: string;
+    createAt:string;
     description: string;
 }
 
 interface Section {
+    id:string;
     name: string;
     startDate: string;
-    endDate: string;
+    endDate: string; 
+    createAt:string;
     description: string;
     subSections: SubSection[];
 } 
@@ -82,7 +86,7 @@ export default function Section({
     const addSubSection = () => {
         const updatedSubSections = [
             ...section.subSections, 
-            { name: "", startDate: "", endDate: "", description: "" },
+            { id:"",name: "", startDate: "", endDate: "",createAt:"", description: "" },
         ];
         handleSectionChange(
             milestoneIndex,

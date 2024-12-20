@@ -5,6 +5,7 @@ export interface Node {
     parentId: string;
     description: string;
     isCompleted: boolean;
+    createAt:string;
     startDate: string | null; // Allow null for drafts or unset dates
     endDate: string | null;
     children?: Node[]; // Recursive structure for nested nodes

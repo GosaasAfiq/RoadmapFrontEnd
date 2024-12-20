@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 
 interface SubSection {
+    id: string;
     name: string;
     startDate: string;
     endDate: string;
+    createAt:string;
     description: string;
 } 
 
@@ -42,7 +44,7 @@ export default function SubSection({
     // Close the description modal and reset to the original description
     const closeDescriptionModal = () => {
         setTempDescription(subSection.description);
-        setIsDescriptionModalOpen(false);
+        setIsDescriptionModalOpen(false); 
     };
 
     // Handle changes in the description input

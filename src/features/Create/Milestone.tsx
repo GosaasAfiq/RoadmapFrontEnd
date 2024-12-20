@@ -5,17 +5,21 @@ import Section from "./Section";
 import { SubSection } from "../../app/models/create/SubSection";
 
 interface Section {
+    id:string;
     name: string;
     startDate: string;
     endDate: string;
+    createAt:string;
     description: string;
     subSections: SubSection[];
 }
 
 interface Milestone {
+    id:string;
     name: string;
     startDate: string;
     endDate: string;
+    createAt:string;
     sections: Section[];
     description: string;
 }

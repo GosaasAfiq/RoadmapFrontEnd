@@ -41,6 +41,8 @@ export default observer(function RoadmapDashboard() {
         localStorage.setItem('view', view); // Save to localStorage
     }; 
 
+
+
     if (loadingInitial) return <LoadingComponent content="Loading..." />
 
     return (
