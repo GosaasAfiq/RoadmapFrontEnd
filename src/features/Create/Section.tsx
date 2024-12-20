@@ -6,6 +6,7 @@ import SubSection from "./SubSection";
 interface SubSection {
     id:string;
     name: string;
+    parentId: string;
     startDate: string;
     endDate: string;
     createAt:string;
@@ -15,6 +16,7 @@ interface SubSection {
 interface Section {
     id:string;
     name: string;
+    parentId: string;
     startDate: string;
     endDate: string; 
     createAt:string;
@@ -87,7 +89,7 @@ export default function Section({
     const addSubSection = () => {
         const updatedSubSections = [
             ...section.subSections, 
-            { id:"",name: "", startDate: "", endDate: "",createAt:"", description: "" },
+            { id:"",name: "", parentId: "", startDate: "", endDate: "",createAt:"", description: "" },
         ];
         handleSectionChange(
             milestoneIndex,

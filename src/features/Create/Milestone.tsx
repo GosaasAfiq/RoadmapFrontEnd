@@ -7,6 +7,7 @@ import { SubSection } from "../../app/models/create/SubSection";
 interface Section {
     id:string;
     name: string;
+    parentId: string;
     startDate: string;
     endDate: string;
     createAt:string;
@@ -17,6 +18,7 @@ interface Section {
 interface Milestone {
     id:string;
     name: string;
+    parentId: string;
     startDate: string;
     endDate: string;
     createAt:string;

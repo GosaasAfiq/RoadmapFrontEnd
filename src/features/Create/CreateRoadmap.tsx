@@ -16,6 +16,7 @@ interface Milestone {
     endDate: string;
     createAt: string;
     description: string;
+    parentId: string;
     sections: Section[];
 }
 
@@ -83,6 +84,7 @@ export default observer(function CreateRoadmap() {
                             return {
                                 id : milestone.id,
                                 name: milestone.name,
+                                parentId: milestone.parentId,
                                 startDate: formatDateForInput(milestone.startDate),
                                 endDate: formatDateForInput(milestone.endDate),
                                 createAt: formatDateForInput(milestone.createAt),
@@ -91,6 +93,7 @@ export default observer(function CreateRoadmap() {
                                     return {
                                         id: section.id,
                                         name: section.name,
+                                        parentId: section.parentId,
                                         startDate: formatDateForInput(section.startDate),
                                         endDate: formatDateForInput(section.endDate),
                                         createAt: formatDateForInput(section.createAt),
@@ -98,6 +101,7 @@ export default observer(function CreateRoadmap() {
                                         subSections: (section.children || []).map((subsection) => ({
                                             id: subsection.id,
                                             name: subsection.name,
+                                            parentId: subsection.parentId,
                                             startDate: formatDateForInput(subsection.startDate),
                                             endDate: formatDateForInput(subsection.endDate),
                                             createAt: formatDateForInput(subsection.createAt),
@@ -120,11 +124,11 @@ export default observer(function CreateRoadmap() {
     const addMilestone = () => {
         setMilestones([
             ...milestones,
-            { id:"",name: "", startDate: "", endDate: "", createAt: "", description: "", sections: [] }, // Add description here
+            { id:"",name: "",parentId: "", startDate: "", endDate: "", createAt: "", description: "", sections: [] }, // Add description here
         ]);
     };
     
-    console.log("Selected roadmap:", selectedRoadmap);
+    // console.log("Selected roadmap:", selectedRoadmap);
     
 
     // Function to handle input changes for milestone fields
@@ -163,6 +167,7 @@ export default observer(function CreateRoadmap() {
             id:"",
             name: "",
             startDate: "",
+            parentId:"",
             endDate: "",
             createAt: "",
             description: "",
@@ -414,7 +419,27 @@ export default observer(function CreateRoadmap() {
                         <div className="flex gap-4">
                             {!isPublished && (
                             <>
-                                <button type="button"  className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600">
+                                <button 
+                                type="button"  
+                                className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600"
+                                onClick={() => {
+                                    const dataToPreview = {
+                                        roadmap: {
+                                            id: roadmapId,
+                                            name: roadmapName,
+                                            userId: userId,
+                                            isPublished: false, // Preview doesn't publish
+                                            createdAt: createdAt,
+                                            milestones: milestones,
+                                        },
+                                    };
+                            
+                                    console.log('Data being sent to create roadmap = ', JSON.stringify(dataToPreview, null, 2));
+                            
+                                    navigate("/preview", { state: dataToPreview });
+
+                                }}
+                                >
                                     Preview
                                 </button>
                                 <button type="button"  
