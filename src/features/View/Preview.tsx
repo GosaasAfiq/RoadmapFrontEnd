@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import ReactFlow, { Background, Controls, Node, Edge, ReactFlowProvider } from "react-flow-renderer";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getLayoutedElements } from "./Dagre"; // Assuming Dagre layout helper is available
 
 const Preview = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const roadmapData = location.state?.roadmap; // Access the roadmap data
     const [nodes, setNodes] = useState<Node[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
@@ -73,6 +74,26 @@ const Preview = () => {
                     {roadmapData?.name || "Unnamed Roadmap"}
                     </h2>
                 </div>
+
+                <button
+                    onClick={() => {
+                        const dataToSendBack = { 
+                            roadmap: roadmapData, 
+                            isDataModified: true,  // Ensure the modified state is passed back
+                        };
+
+                        if (roadmapData?.id) {
+                            // If an ID exists, navigate to the Edit route with the roadmap ID
+                            navigate(`/edit/${roadmapData.id}`, { state: dataToSendBack });
+                        } else {
+                            // If no ID exists, navigate to the Create route
+                            navigate("/create", { state: dataToSendBack });
+                        }
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600"
+                >
+                    Back
+                </button>
             </div>
             <ReactFlowProvider>
                 <ReactFlow

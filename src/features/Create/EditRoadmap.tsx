@@ -7,6 +7,7 @@ import { SubSection } from "../../app/models/create/SubSection";
 import Milestone from "./Milestone";
 import { NavLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { isEqual } from "lodash";
 
 interface Milestone {
     id:string;
@@ -34,43 +35,108 @@ export default observer(function CreateRoadmap() {
 
 
     const {id} = useParams();
-    let createdAt ="";
-    let roadmapId = "";
-    let isPublished = false;
-
-    const [isDataModified, setIsDataModified] = useState(false); 
-
-    const [comingBackFromPreview, setComingBackFromPreview] = useState(false);
-
-    useEffect(() => {
-        if (location.state?.isDataModified !== undefined) {
-            setIsDataModified(location.state.isDataModified);  // Update local state when coming back from Preview
-            setComingBackFromPreview(true); // Flag that we are coming back from preview
-        }
-    }, [location.state]);
-
-
-
-    useEffect(() => {
-        if (comingBackFromPreview) {
-            // Skip loading the roadmap if we're coming back from preview
-            setComingBackFromPreview(false); // Reset the flag
-            return;
-        }
+        let createdAt ="";
+        let roadmapId = "";
+        let isPublished = false;
         
-        if (location.state?.roadmap) {
-            // Populate state with roadmap data passed back from Preview
-            const { name, milestones } = location.state.roadmap;
-            setRoadmapName(name || "");
-            setMilestones(milestones || []);
-        } 
-        else {
-            // Reset state for creating a new roadmap
-            setRoadmapName("");
-            setMilestones([]);
+        if(id){
+            roadmapId = selectedRoadmap?.id || "";
+            createdAt = selectedRoadmap?.createdAt || "";
+            isPublished = selectedRoadmap?.isPublished || false;
         }
-    }, [id, loadRoadmap, location.state, comingBackFromPreview]);
     
+        const [isDataModified, setIsDataModified] = useState(false); 
+        console.log("datamodified:", isDataModified);
+    
+        const [comingBackFromPreview, setComingBackFromPreview] = useState(false);
+    
+    // UseEffect to handle changes from preview.tsx state
+        useEffect(() => {
+            if (location.state?.isDataModified !== undefined) {
+                setIsDataModified(location.state.isDataModified);  // Update local state when coming back from Preview
+                setComingBackFromPreview(true); // Flag that we are coming back from preview
+            }
+        }, [location.state]);
+    
+        const addDays = (dateString: string | null, days: number) => {
+            if (!dateString) return ""; // Handle null or empty dates
+            const date = new Date(dateString);
+            date.setDate(date.getDate() + days); // Increment the date by the specified number of days
+            return date.toISOString().split("T")[0]; // Return the date in the desired format
+        };
+    
+    
+        useEffect(() => {
+            if (comingBackFromPreview) {
+                // Skip loading the roadmap if we're coming back from preview
+                setComingBackFromPreview(false); // Reset the flag
+                return;
+            }
+            
+            if (location.state?.roadmap) {
+                // Populate state with roadmap data passed back from Preview
+                const { name, milestones } = location.state.roadmap;
+                setRoadmapName(name || "");
+                setMilestones(milestones || []);
+            } 
+            else if (id) {
+                // Load existing roadmap only if no data was passed from Preview
+                loadRoadmap(id);
+            } 
+        }, [id, loadRoadmap, location.state, comingBackFromPreview]);
+        
+        
+            const formatDateForInput = (dateString: string | null) => {
+                if (!dateString) return ""; // Handle null or empty dates
+                return new Date(dateString).toISOString().split("T")[0];
+            };
+
+    useEffect(() => {
+            if (selectedRoadmap) {
+                setRoadmapName((prev) => (prev !== selectedRoadmap.roadmapName ? selectedRoadmap.roadmapName || "" : prev));
+        
+                if (selectedRoadmap.nodes) {
+                    const mappedMilestones = selectedRoadmap.nodes
+                        .filter((node) => node.parentId === null)
+                        .map((milestone) => {
+                            return {
+                                id : milestone.id,
+                                name: milestone.name,
+                                parentId: milestone.parentId,
+                                startDate: formatDateForInput(addDays(milestone.startDate, 1)), 
+                                endDate: formatDateForInput(addDays(milestone.endDate, 1)), 
+                                createAt: formatDateForInput(milestone.createAt),
+                                description: milestone.description || "",
+                                sections: (milestone.children || []).map((section) => {    
+                                    return {
+                                        id: section.id,
+                                        name: section.name,
+                                        parentId: section.parentId,
+                                        startDate: formatDateForInput(addDays(section.startDate, 1)), 
+                                        endDate: formatDateForInput(addDays(section.endDate, 1)),
+                                        createAt: formatDateForInput(section.createAt),
+                                        description: section.description || "",
+                                        subSections: (section.children || []).map((subsection) => ({
+                                            id: subsection.id,
+                                            name: subsection.name,
+                                            parentId: subsection.parentId,
+                                            startDate: formatDateForInput(addDays(subsection.startDate, 1)),
+                                            endDate: formatDateForInput(addDays(subsection.endDate, 1)),
+                                            createAt: formatDateForInput(subsection.createAt),
+                                            description: subsection.description || "",
+                                        })),
+                                    };
+                                }),
+                            };
+                        });
+        
+                    if (!isEqual(milestones, mappedMilestones)) {
+                        setMilestones(mappedMilestones);
+                    }
+                }
+            }
+            
+        }, [selectedRoadmap]);
 
 
     // Function to add a new milestone row
@@ -285,30 +351,28 @@ export default observer(function CreateRoadmap() {
             console.log(dataToSend);
             
             try {
-                if (isPublished) {                        
-                    await createRoadmap(dataToSend!);
+                if (id) {
+                    if (isPublished) {
+                        await updateRoadmap(dataToSend!);
 
-                    toast.success( "Roadmap Created!");
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Created a roadmap"
+                        };
 
-                    const auditTrailData = {
-                        userId: userId,  
-                        action: "Created a roadmap"
-                    };
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    } else {
+                        await updateRoadmap(dataToSend!);
 
-                    // await store.auditTrailStore.create(auditTrailData);
-                    navigate("/roadmaps");
-                } else {                        
-                    await createRoadmap(dataToSend!);
+                        const auditTrailData = {
+                            userId: userId,  
+                            action: "Updated a draft"
+                        };
 
-                    toast.success( "Draft Created!");
-
-                    const auditTrailData = {
-                        userId: userId,  
-                        action: "Created a draft"
-                    };
-
-                    // await store.auditTrailStore.create(auditTrailData);
-                    navigate("/roadmaps");
+                        // await store.auditTrailStore.create(auditTrailData);
+                        navigate("/roadmaps");
+                    }
                 } 
             } catch (error) {
                 console.error("Error submitting roadmap:", error);
@@ -316,7 +380,6 @@ export default observer(function CreateRoadmap() {
             }
         
     };
-  
 
     if (loadingInitial) return <LoadingComponent content="Loading..." />
 
@@ -324,7 +387,7 @@ export default observer(function CreateRoadmap() {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Page Title */}
-            <h1 className="text-2xl font-bold text-gray-800 p-8">Create Roadmap</h1>
+            <h1 className="text-2xl font-bold text-gray-800 p-8">Edit Roadmap</h1>
 
             {/* Outer Box (Full Screen) */}
             <div className="flex-grow bg-white p-8 rounded-lg shadow-lg mx-8 relative">
@@ -348,6 +411,8 @@ export default observer(function CreateRoadmap() {
 
                         {/* Buttons */}
                         <div className="flex gap-4">
+                            {!isPublished && (
+                            <>
                                 <button 
                                 type="button"  
                                 className="bg-blue-500 text-white px-6 py-2 rounded-md shadow hover:bg-blue-600"
@@ -361,7 +426,6 @@ export default observer(function CreateRoadmap() {
                                             createdAt: createdAt,
                                             milestones: milestones,
                                         },
-                                        isDataModified,
                                     };
                             
                                     console.log('Data being sent to create roadmap = ', JSON.stringify(dataToPreview, null, 2));
@@ -378,6 +442,8 @@ export default observer(function CreateRoadmap() {
                                 >
                                     + Milestone
                                 </button>
+                            </>
+                            )}
                         </div>
                     </div>
 
@@ -405,6 +471,21 @@ export default observer(function CreateRoadmap() {
 
                     {/* Action Buttons (Cancel, Save, Publish) */}
                     <div className="flex justify-end gap-4">
+                        {isPublished && (
+                        <>
+                            <NavLink to={`/roadmaps/${selectedRoadmap!.id}`}>
+                                <button type="button"  className="bg-red-500 text-white px-6 py-2 rounded-md shadow hover:bg-red-600">
+                                    Cancel
+                                </button>
+                            </NavLink>
+                            <button 
+                                type="submit"
+                                onClick={() => setAction("publish")}
+                                className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
+                                    Update
+                            </button>
+                        </>
+                        )}
                         {!isPublished && (
                         <>
                             <NavLink to="/roadmaps">

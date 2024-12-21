@@ -17,7 +17,7 @@ import { toast } from "react-toastify";
 export default observer(function Detail() {
   const { id } = useParams<{ id: string }>();
   const { roadmapStore,userStore } = useStore();
-  const { selectedRoadmap, loadRoadmap, loading,updateNode } = roadmapStore;
+  const { selectedRoadmap, loadRoadmap, loadingInitial,updateNode } = roadmapStore;
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [showPopup, setShowPopup] = useState(false);
@@ -220,7 +220,7 @@ export default observer(function Detail() {
     setSelectedNode(null);
   };
 
-  if (loading) return <LoadingComponent content="Loading roadmap details..." />;
+ if (loadingInitial) return <LoadingComponent content="Loading..." />
   if (!selectedRoadmap) return <p>Roadmap not found!</p>;
 
   return (

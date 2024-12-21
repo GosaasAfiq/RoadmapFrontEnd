@@ -6,6 +6,7 @@ import CreateRoadmap from "../../features/Create/CreateRoadmap";
 import AuditTrail from "../../features/AuditTrail/AuditTrail";
 import Details from "../../features/View/Details";
 import Preview from "../../features/View/Preview";
+import EditRoadmap from "../../features/Create/EditRoadmap";
 
 
 export const routes: RouteObject[] = [
@@ -15,8 +16,8 @@ export const routes: RouteObject[] = [
         children:[
             {path: '', element:<Login/>},
             {path: 'roadmaps', element:<RoadmapDashboard/>},
-            {path: 'create', element:<CreateRoadmap key="create"/>}, 
-            {path: 'edit/:id', element:<CreateRoadmap key="edit"/>}, 
+            {path: 'create', element:<CreateRoadmap/>}, 
+            {path: 'edit/:id', element:<EditRoadmap/>}, 
             {path: 'audittrail', element:<AuditTrail/>},
             {path: 'roadmaps/:id', element: <Details /> },
             {path: 'preview', element: <Preview /> },
