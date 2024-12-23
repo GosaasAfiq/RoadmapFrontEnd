@@ -10,9 +10,6 @@ export const useGoogleAuth = () => {
         try {
             const token = credentialResponse.credential;
 
-            console.log("Google Credential Token:", token);
-
-            // Send token to backend for validation
             const response = await fetch("http://localhost:5000/api/auth/google-response", {
                 method: "POST",
                 headers: {

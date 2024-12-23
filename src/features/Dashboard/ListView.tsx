@@ -15,6 +15,8 @@ const ListView: React.FC<ListViewProps> = ({ roadmaps }) => (
           <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Progress</th>
           <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Start Date</th>
           <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">End Date</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Created Date</th>
+          <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Upated Date</th>
           <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Status</th>
           <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 uppercase">Action</th>
         </tr>
@@ -26,6 +28,8 @@ const ListView: React.FC<ListViewProps> = ({ roadmaps }) => (
             <td className="px-6 py-4 text-sm text-gray-600">{roadmap.completionRate}</td>
             <td className="px-6 py-4 text-sm text-gray-600">{roadmap.startDate}</td>
             <td className="px-6 py-4 text-sm text-gray-600">{roadmap.endDate}</td>
+            <td className="px-6 py-4 text-sm text-gray-600">{roadmap.createdAt}</td>
+            <td className="px-6 py-4 text-sm text-gray-600">{roadmap.updatedAt}</td>
             <td className="px-6 py-4 text-sm text-gray-600">
               {roadmap.isPublished ? 'Published' : 'Draft'}
             </td>

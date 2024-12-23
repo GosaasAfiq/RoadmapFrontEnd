@@ -26,6 +26,22 @@ export default class RoadmapStore {
 
     };
 
+    // Reset all filters to default state
+    resetFilters = () => {
+        this.page = 1;
+        this.pageSize = 6;
+        this.filterCounts = {
+            all: 0,
+            draft: 0,
+            "not-started": 0,
+            "in-progress": 0,
+            completed: 0,
+            "near-due": 0,
+            overdue: 0,
+        };
+    };
+
+
     constructor() {
         makeAutoObservable(this);
     }
@@ -60,13 +76,14 @@ export default class RoadmapStore {
                     this.filterCounts["near-due"] =nearDueCount;
                     this.filterCounts["overdue"] = overdueCount;
                 }
+                this.loadingInitial = false;
             });
-            this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to load roadmaps:", error);
             this.loadingInitial = false;
         }
     };
+    
  
     loadRoadmap = async (id: string) => {
         this.loadingInitial = true;
@@ -74,8 +91,8 @@ export default class RoadmapStore {
             const roadmap = await agent.Roadmaps.details(id); // Assume `agent.Roadmaps.details` fetches the roadmap by ID
             runInAction(() => {
                 this.selectedRoadmap = roadmap; // Set the fetched roadmap as selected
+                this.loadingInitial = false;
             });
-            this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to load the roadmap:", error);
             this.loadingInitial = false;
@@ -92,8 +109,8 @@ export default class RoadmapStore {
             runInAction(() => {
                 this.roadmaps.push(createdRoadmap); // Add to roadmaps list
                 this.selectedRoadmap = createdRoadmap; // Optionally set as selected
+                this.loadingInitial = false;
             });
-            this.loadingInitial = false;
         } catch (error) {
             console.error("Error creating roadmap:", error);
             this.loadingInitial = false;

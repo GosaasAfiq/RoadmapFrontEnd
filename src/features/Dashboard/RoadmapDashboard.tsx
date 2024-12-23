@@ -71,42 +71,66 @@ export default observer(function RoadmapDashboard() {
             </div>
 
             {/* Icons Section */}
-            <div className="flex justify-end items-center space-x-4 mb-6">
-                
-                {/* List Icon */}
-                <div 
-                    onClick={() => handleViewSwitch('list')} 
-                    className={`flex items-center justify-center w-10 h-10 ${!isListView ? 'bg-gray-300' : 'hover:bg-gray-300'} transition cursor-pointer`}
-                >
-                    <FontAwesomeIcon icon={faTable} className="text-gray-800 text-xl" />
+            <div className="flex justify-between items-center mb-6">
+
+                {/* Left Section: Total Roadmaps */}
+                <div className="bg-gray-100 p-3 rounded-lg shadow-sm border border-gray-300">
+                    <span className="text-gray-800 font-medium text-base">
+                        Total Roadmaps: <span className="text-blue-600">{roadmapStore.totalCount}</span>
+                    </span>
                 </div>
 
-                {/* Table Icon */}
-                <div 
-                    onClick={() => handleViewSwitch('table')} 
-                    className={`flex items-center justify-center w-10 h-10 ${isListView ? 'bg-gray-300' : 'hover:bg-gray-300'} transition cursor-pointer`}
-                >
-                    <FontAwesomeIcon icon={faList} className="text-gray-800 text-xl" />
-                </div>
+                {/* Right Section: Icons and Dropdown */}
+                <div className="flex items-center space-x-4">
 
-                <select
-                    id="paginationDropdown"
-                    value={pageSize}
-                    onChange={(e) => {
-                        const newPageSize = parseInt(e.target.value, 10);
-                        setPageSize(newPageSize); // Let useEffect trigger loadRoadmaps
+                <button
+                    onClick={() => {
+                        // Reset filters in the store
+                        roadmapStore.resetFilters();
+                        // Also reset the searchTerm and filter to default values
+                        setSearchTerm('');  // Assuming you have a search term state
+                        setFilter('all');   // Assuming you have a filter state
+                        // Reload the roadmaps with default values
+                        loadRoadmaps('', 'all', 1, 6);
                     }}
-                    className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
+                    className="ml-4 p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg"
                 >
-                    <option value="6">6</option>
-                    <option value="9">9</option>
-                    <option value="12">12</option>
-                </select>
+                    Clear Filters
+                </button>
 
+                    {/* List Icon */}
+                    <div 
+                        onClick={() => handleViewSwitch('list')} 
+                        className={`flex items-center justify-center w-10 h-10 ${!isListView ? 'bg-gray-300' : 'hover:bg-gray-300'} transition cursor-pointer`}
+                    >
+                        <FontAwesomeIcon icon={faTable} className="text-gray-800 text-xl" />
+                    </div>
 
+                    {/* Table Icon */}
+                    <div 
+                        onClick={() => handleViewSwitch('table')} 
+                        className={`flex items-center justify-center w-10 h-10 ${isListView ? 'bg-gray-300' : 'hover:bg-gray-300'} transition cursor-pointer`}
+                    >
+                        <FontAwesomeIcon icon={faList} className="text-gray-800 text-xl" />
+                    </div>
 
-
+                    {/* Dropdown */}
+                    <select
+                        id="paginationDropdown"
+                        value={pageSize}
+                        onChange={(e) => {
+                            const newPageSize = parseInt(e.target.value, 10);
+                            setPageSize(newPageSize); // Let useEffect trigger loadRoadmaps
+                        }}
+                        className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none w-full sm:w-auto"
+                    >
+                        <option value="6">6</option>
+                        <option value="9">9</option>
+                        <option value="12">12</option>
+                    </select>
+                </div>
             </div>
+
 
             {isListView ? <ListView roadmaps={roadmaps} /> : <TableView roadmaps={roadmaps} />}
 
