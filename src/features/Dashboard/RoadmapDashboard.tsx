@@ -23,6 +23,10 @@ export default observer(function RoadmapDashboard() {
     const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
 
     useEffect(() => {
+
+        roadmapStore.roadmaps = [];  // Clear the roadmaps state
+        roadmapStore.loadingInitial = true;
+        
         const debounceLoadRoadmaps = _.debounce(() => {
             roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize);
         }, 500);
@@ -150,7 +154,6 @@ export default observer(function RoadmapDashboard() {
                 {/* Page Number */}
                 <span>Page {roadmapStore.page}</span>
                 
-                {/* Next Button */}
                 {/* Next Button */}
                 <button
                     disabled={

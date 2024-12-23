@@ -107,6 +107,7 @@ export default function Milestone({
                         onChange={(e) => handleMilestoneChange(milestoneIndex, "name", e.target.value)}
                         required
                         disabled={isPublished}  
+                        maxLength={40}
                     />
                 </div>
 

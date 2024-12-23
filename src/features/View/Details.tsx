@@ -13,6 +13,7 @@ import LoadingComponent from "../../app/layout/LoadingComponent";
 import { getLayoutedElements } from "./Dagre";
 import { Roadmap } from "../../app/models/roadmap";
 import { toast } from "react-toastify";
+import ConfirmationModal from "./ConfirmationModal";
 
 export default observer(function Detail() {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,24 @@ export default observer(function Detail() {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [confirmModalTitle, setConfirmModalTitle] = useState("");
+  const [confirmModalMessage, setConfirmModalMessage] = useState("");
+  const [confirmModalAction, setConfirmModalAction] = useState<() => void>(() => () => {});
+  
+  const openConfirmModal = (title: string, message: string, action: () => void) => {
+    setConfirmModalTitle(title);
+    setConfirmModalMessage(message);
+    setConfirmModalAction(() => action);
+    setConfirmModalOpen(true);
+  };
+  
+  const closeConfirmModal = () => {
+    setConfirmModalOpen(false);
+  };
+  
+
 
   const navigate = useNavigate(); // For navigation
   const userId = userStore.user?.id;
@@ -90,126 +109,122 @@ export default observer(function Detail() {
 
   const handleCheckboxChange = () => {
     if (selectedNode) {
-      const confirmAction = window.confirm(
+      openConfirmModal(
+        `Confirm Action`,
         `Are you sure you want to ${
           selectedNode.data.isCompleted ? "unmark" : "mark"
-        } this node as completed?`
-      );
+        } this node as completed?`,
+        () => {
+          const updatedNode = {
+            ...selectedNode,
+            data: { ...selectedNode.data, isCompleted: !selectedNode.data.isCompleted },
+          };
   
-      if (!confirmAction) return;
-
-      // Update the isCompleted attribute in the selected node
-      const updatedNode = {
-        ...selectedNode,
-        data: { ...selectedNode.data, isCompleted: !selectedNode.data.isCompleted },
-      };
+          const updateChildren = (nodeId: string, isCompleted: boolean) => {
+            setNodes((prevNodes) =>
+              prevNodes.map((node) => {
+                if (node.data.parentId === nodeId) {
+                  const updatedChild = {
+                    ...node,
+                    data: { ...node.data, isCompleted },
+                  };
+                  updateChildren(node.id, isCompleted); // Recursive call for child nodes
+                  return updatedChild;
+                }
+                return node;
+              })
+            );
+          };
   
-      const updateChildren = (nodeId: string, isCompleted: boolean) => {
-        setNodes((prevNodes) =>
-          prevNodes.map((node) => {
-            if (node.data.parentId === nodeId) {
-              const updatedChild = {
-                ...node,
-                data: { ...node.data, isCompleted },
-              };
-              updateChildren(node.id, isCompleted); // Recursive call for child nodes
-              return updatedChild;
-            }
-            return node;
-          })
-        );
-      };
-
-
-      // Update the nodes state
-      setNodes((prevNodes) =>
-        prevNodes.map((node) => (node.id === updatedNode.id ? updatedNode : node))
+          setNodes((prevNodes) =>
+            prevNodes.map((node) => (node.id === updatedNode.id ? updatedNode : node))
+          );
+  
+          if (updatedNode.data.isCompleted) {
+            updateChildren(updatedNode.id, true); // Mark children as completed
+          }
+  
+          setSelectedNode(updatedNode);
+        }
       );
-
-    // If marking the node as completed, update its children too
-      if (updatedNode.data.isCompleted) {
-        updateChildren(updatedNode.id, true);  // Mark children as completed
-      }
-        setSelectedNode(updatedNode); // Update the local selectedNode state
     }
   };
+  
 
   const handleSave = async () => {
+    openConfirmModal(
+      "Confirm Save",
+      "Are you sure you want to save? Changes cannot be undone.",
+      async () => {
+      if (selectedRoadmap) {
+        
+        const updatedNodes = nodes.map((node) => ({
+          id: node.id,
+          name: node.data.label,
+          description: node.data.description,
+          startDate: node.data.startDate,
+          endDate: node.data.endDate,
+          isCompleted: node.data.isCompleted,
+          parentId: node.data.parentId,
+          roadmapId: selectedRoadmap.id,
+        }));
 
-    const confirmSave = window.confirm(
-      "Are you sure you want to save? Changes cannot be undone."
-    );
+        if (!selectedRoadmap.id) {
+          throw new Error("Roadmap ID is missing.");
+        }
     
-    if (!confirmSave) {
-      return; // If user cancels, exit the function
-    }
+        // Build the complete roadmap object
+        const updatedRoadmap = {
+          id: selectedRoadmap.id,
+          isPublished: selectedRoadmap.isPublished,
+          isCompleted: selectedRoadmap.isCompleted,
+          nodes: updatedNodes,
+        } as Roadmap; // Assert as Roadmap
 
-    if (selectedRoadmap) {
-      
-      const updatedNodes = nodes.map((node) => ({
-        id: node.id,
-        name: node.data.label,
-        description: node.data.description,
-        startDate: node.data.startDate,
-        endDate: node.data.endDate,
-        isCompleted: node.data.isCompleted,
-        parentId: node.data.parentId,
-        roadmapId: selectedRoadmap.id,
-      }));
+        const auditTrailData = {
+          userId: userId ?? "unknown", // Use a fallback value if userId is undefined
+          action: "Marked node as complete"
+      };
+    
+      // await store.auditTrailStore.create(auditTrailData);
 
-      if (!selectedRoadmap.id) {
-        throw new Error("Roadmap ID is missing.");
+        await updateNode(updatedRoadmap);
+
+        loadRoadmap(selectedRoadmap.id); 
       }
-  
-      // Build the complete roadmap object
-      const updatedRoadmap = {
-        id: selectedRoadmap.id,
-        isPublished: selectedRoadmap.isPublished,
-        isCompleted: selectedRoadmap.isCompleted,
-        nodes: updatedNodes,
-      } as Roadmap; // Assert as Roadmap
-
-      const auditTrailData = {
-        userId: userId ?? "unknown", // Use a fallback value if userId is undefined
-        action: "Marked node as complete"
-    };
-  
-    // await store.auditTrailStore.create(auditTrailData);
-
-      await updateNode(updatedRoadmap);
-
-      loadRoadmap(selectedRoadmap.id); 
-    }
+      }
+    );
   };
 
   const handleDeleteRoadmap = async (roadmapId: string) => {
-    const confirmDelete = window.confirm(
-        "Are you sure you want to delete this roadmap? This action cannot be undone."
-    );
+    openConfirmModal(
+      "Confirm Delete",
+      "Are you sure you want to delete this roadmap? This action cannot be undone.",
+      async () => {
 
-    if (!confirmDelete) return;
+      const data = {
+          id: roadmapId,
+          isDeleted: true
+      };
+      console.log(data);
 
-    const data = {
-        id: roadmapId,
-        isDeleted: true
+      const auditTrailData = {
+        userId: userId ?? "unknown", // Use a fallback value if userId is undefined
+        action: "Deleted a roadmap"
     };
-    console.log(data);
 
-    const auditTrailData = {
-      userId: userId ?? "unknown", // Use a fallback value if userId is undefined
-      action: "Deleted a roadmap"
-  };
+    // await store.auditTrailStore.create(auditTrailData);
 
-  // await store.auditTrailStore.create(auditTrailData);
+      // Send the data to the store to handle the delete logic
+      await roadmapStore.deleteRoadmap(data);
 
-    // Send the data to the store to handle the delete logic
-    await roadmapStore.deleteRoadmap(data);
+      // Show toast notification
+      toast.success("Roadmap deleted successfully!");
 
-    // Show toast notification
-    toast.success("Roadmap deleted successfully!");
-
-    // Redirect to the roadmaps dashboard
-    navigate("/roadmaps");
+      // Redirect to the roadmaps dashboard
+      navigate("/roadmaps");
+      }
+    );
 };
 
   
@@ -226,12 +241,16 @@ export default observer(function Detail() {
   return (
     <div className="h-screen flex flex-col">
       <div className="flex items-center justify-between mb-4 p-4 bg-gray-100 rounded-lg shadow-md">
-        <div className="flex flex-col">
-          <h2 className="text-2xl font-bold text-gray-800">
+        {/* Left: Roadmap Name and Progress Bar */}
+        <div className="flex flex-col w-full">
+          {/* Roadmap Name */}
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
             {selectedRoadmap.roadmapName}
           </h2>
-          <div className="flex items-center">
-            <div className="mt-2 w-full bg-gray-300 h-2 rounded-full">
+
+          {/* Progress Bar */}
+          <div className="w-full max-w-lg mt-2">
+            <div className="bg-gray-300 h-2 rounded-full">
               <div
                 className="h-full rounded-full"
                 style={{
@@ -241,37 +260,43 @@ export default observer(function Detail() {
                 }}
               />
             </div>
-            <p className="text-sm text-gray-500 ml-2">{`${selectedRoadmap.completionRate}%`}</p>
+            <p className="text-sm text-gray-500 mt-1 self-end">{`${selectedRoadmap.completionRate}%`}</p>
           </div>
         </div>
 
         {/* Right: Start and End Date, and Delete Button */}
         <div className="flex items-center space-x-6">
-          <div className="text-sm text-gray-600">
-            {selectedRoadmap.startDate && (
-              <span className="font-semibold text-gray-800 mr-6">Start Date: {selectedRoadmap.startDate}</span> // Added margin-right
-            )}
-            {selectedRoadmap.endDate && (
-              <span className="font-semibold text-gray-800">End Date: {selectedRoadmap.endDate}</span>
-            )}
-          </div>
-        <button
-          onClick={handleSave}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600"
-        >
-          Save
-        </button>
+          <div className="flex items-center space-x-4">
+            {/* Start Date */}
+            <div className="bg-blue-50 p-3 rounded-lg shadow-sm flex items-center space-x-2 w-auto whitespace-nowrap">
+              <span className="text-sm font-semibold text-blue-700">Start Date:</span>
+              <span className="text-sm text-gray-700">{selectedRoadmap.startDate}</span>
+            </div>
 
-        <button
+            {/* End Date */}
+            <div className="bg-blue-50 p-3 rounded-lg shadow-sm flex items-center space-x-2 w-auto whitespace-nowrap">
+              <span className="text-sm font-semibold text-blue-700">End Date:</span>
+              <span className="text-sm text-gray-700">{selectedRoadmap.endDate}</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSave}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600"
+          >
+            Save
+          </button>
+
+          <button
             onClick={() => handleDeleteRoadmap(selectedRoadmap.id)}
             className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-600"
           >
             Delete
           </button>
+        </div>
       </div>
 
-
-      </div>
+      
       <div className="flex-1 overflow-auto">
         <ReactFlowProvider>
           <ReactFlow
@@ -303,44 +328,44 @@ export default observer(function Detail() {
             </div>
 
             {/* Second Row: Start and End Date on the Left, Edit Date Button on the Right */}
-      <div className="flex justify-between items-center mb-4">
-        {/* Start and End Date */}
-        <div className="text-sm text-gray-600">
-          {selectedNode.data.startDate && selectedNode.data.endDate ? (
-            <span className="font-semibold text-gray-800">
-              {new Date(selectedNode.data.startDate).toLocaleDateString("en-GB")} - 
-              {new Date(selectedNode.data.endDate).toLocaleDateString("en-GB")}
-            </span>
-          ) : (
-            <span className="font-semibold text-gray-800">Dates Not Available</span>
-          )}
-        </div>
+            <div className="flex justify-between items-center mb-4">
+              {/* Start and End Date */}
+              <div className="text-sm text-gray-600">
+                {selectedNode.data.startDate && selectedNode.data.endDate ? (
+                  <span className="font-semibold text-gray-800">
+                    {new Date(selectedNode.data.startDate).toLocaleDateString("en-GB")} - 
+                    {new Date(selectedNode.data.endDate).toLocaleDateString("en-GB")}
+                  </span>
+                ) : (
+                  <span className="font-semibold text-gray-800">Dates Not Available</span>
+                )}
+              </div>
 
-        {/* Edit Date Button on the Right */}
-        <NavLink
-            to={`/edit/${selectedRoadmap.id}`} // Navigate to Detail page
-            className="border border-green-500 text-green-500 rounded-md px-4 py-1 hover:bg-green-500 hover:text-white transition"
-          >
-            Edit
-        </NavLink>
-      </div>
+              {/* Edit Date Button on the Right */}
+              <NavLink
+                  to={`/edit/${selectedRoadmap.id}`} // Navigate to Detail page
+                  className="border border-green-500 text-green-500 rounded-md px-4 py-1 hover:bg-green-500 hover:text-white transition"
+                >
+                  Edit
+              </NavLink>
+            </div>
 
-      {/* Node Completion Progress Bar */}
-      <div className="flex items-center justify-center mb-4">
-        {/* Progress Bar */}
-        <div className="w-3/4 bg-gray-300 h-2 rounded-full">
-          <div
-            className="h-full rounded-full"
-            style={{
-              width: `${selectedNode.data.completionRate}%`,
-              backgroundColor: selectedNode.data.completionRate >= 50 ? "#4caf50" : "#e74c3c",
-            }}
-          />
-        </div>
+            {/* Node Completion Progress Bar */}
+            <div className="flex items-center justify-center mb-4">
+              {/* Progress Bar */}
+              <div className="w-3/4 bg-gray-300 h-2 rounded-full">
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${selectedNode.data.completionRate}%`,
+                    backgroundColor: selectedNode.data.completionRate >= 50 ? "#4caf50" : "#e74c3c",
+                  }}
+                />
+              </div>
 
-        {/* Percentage Text Beside the Progress Bar */}
-        <p className="text-sm text-gray-500 ml-2">{`${selectedNode.data.completionRate}%`}</p>
-      </div>
+              {/* Percentage Text Beside the Progress Bar */}
+              <p className="text-sm text-gray-500 ml-2">{`${selectedNode.data.completionRate}%`}</p>
+            </div>
 
             <textarea
               value={selectedNode.data.description || "No description available"}
@@ -363,6 +388,18 @@ export default observer(function Detail() {
           </div>
         </div>
       )}
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+      title={confirmModalTitle}
+      message={confirmModalMessage}
+      isOpen={isConfirmModalOpen}
+      onClose={closeConfirmModal}
+      onConfirm={() => {
+        confirmModalAction();
+        closeConfirmModal();
+      }}
+    />
+
     </div>
   );
 });

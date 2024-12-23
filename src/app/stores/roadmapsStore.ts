@@ -126,6 +126,7 @@ export default class RoadmapStore {
     };
 
     updateNode = async (roadmapData: Roadmap) => {
+        this.loadingInitial = true;
         try {
             // Send the request to the backend to create the roadmap
             const updatedRoadmap = await agent.Roadmaps.updatenode(roadmapData);
@@ -141,9 +142,11 @@ export default class RoadmapStore {
                 if (this.selectedRoadmap?.id === updatedRoadmap.id) {
                     this.selectedRoadmap = updatedRoadmap;
                 }
+                this.loadingInitial = false;
             });
         } catch (error) {
             console.error("Error creating roadmap:", error);
+            this.loadingInitial = false;
         }
     }; 
 

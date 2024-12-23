@@ -74,6 +74,7 @@ export default function SubSection({
                     onChange={(e) =>
                         handleSubSectionChange(subSectionIndex, "name", e.target.value)
                     }
+                    maxLength={40}
                 />
             </div>
 

@@ -206,6 +206,7 @@ export default function Section({
                                 e.target.value
                             )
                         }
+                        maxLength={40}
                     />
                 </div>
 
