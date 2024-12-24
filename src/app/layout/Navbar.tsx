@@ -6,7 +6,7 @@ import { observer } from "mobx-react-lite";
 
 export default observer(function NavBar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const { userStore } = useStore();
+    const { userStore,roadmapStore} = useStore();
     const navigate = useNavigate();
     const { user, loading } = useAuth();
 
@@ -28,7 +28,9 @@ export default observer(function NavBar() {
 
     const handleLogout = async () => {
 
-        if (user) {  // Check if user is not null or undefined
+        if (user) {  
+
+            roadmapStore.setFilterAllZero();
             const auditTrailData = {
                 userId: user.id,  // Access the userId from the user object
                 action: "User Logged out"

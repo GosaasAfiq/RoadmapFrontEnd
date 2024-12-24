@@ -23,10 +23,10 @@ export default observer(function RoadmapDashboard() {
     const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
 
     useEffect(() => {
-
-        roadmapStore.roadmaps = [];  // Clear the roadmaps state
+        roadmapStore.setPage(1);
         roadmapStore.loadingInitial = true;
-        
+        roadmapStore.roadmaps = [];  // Clear the roadmaps state
+
         const debounceLoadRoadmaps = _.debounce(() => {
             roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize);
         }, 500);
@@ -35,7 +35,7 @@ export default observer(function RoadmapDashboard() {
     
         // Cleanup debounce on unmount
         return () => debounceLoadRoadmaps.cancel();
-    }, [searchTerm, filter, pageSize, roadmapStore.page]);
+    }, [searchTerm, filter, pageSize]);
     
     
 

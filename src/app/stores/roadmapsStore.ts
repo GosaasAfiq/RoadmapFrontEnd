@@ -109,6 +109,7 @@ export default class RoadmapStore {
             runInAction(() => {
                 this.roadmaps.push(createdRoadmap); // Add to roadmaps list
                 this.selectedRoadmap = createdRoadmap; // Optionally set as selected
+                this.setFilterAllZero();
                 this.loadingInitial = false;
             });
         } catch (error) {
@@ -124,6 +125,11 @@ export default class RoadmapStore {
     setPageSize = (pageSize: number) => {
         this.pageSize = pageSize;
     };
+
+    setFilterAllZero = () => {
+        this.filterCounts.all = 0;
+    };
+    
 
     updateNode = async (roadmapData: Roadmap) => {
         this.loadingInitial = true;
@@ -142,6 +148,7 @@ export default class RoadmapStore {
                 if (this.selectedRoadmap?.id === updatedRoadmap.id) {
                     this.selectedRoadmap = updatedRoadmap;
                 }
+                this.setFilterAllZero();
                 this.loadingInitial = false;
             });
         } catch (error) {
@@ -153,6 +160,7 @@ export default class RoadmapStore {
     
 
     deleteRoadmap = async (data: { id: string, isDeleted: boolean }) => {
+        this.loadingInitial = true;
         try {
             // Perform a soft delete by marking the roadmap as deleted
             await agent.Roadmaps.deleteRoadmap(data);
@@ -171,9 +179,12 @@ export default class RoadmapStore {
                 if (this.selectedRoadmap?.id === data.id) {
                     this.selectedRoadmap.isDeleted = data.isDeleted;
                 }
+                this.setFilterAllZero();
+                this.loadingInitial = false;
             });
         } catch (error) {
             console.error("Error marking roadmap as deleted:", error);
+            this.loadingInitial = false;
             throw new Error("Failed to mark roadmap as deleted.");
         }
     };
@@ -190,8 +201,9 @@ export default class RoadmapStore {
                 if (this.selectedRoadmap?.id === updatedRoadmap.id) {
                     this.selectedRoadmap = updatedRoadmap;
                 }
+                this.setFilterAllZero();
+                this.loadingInitial = false;
             });
-            this.loadingInitial = false;
         } catch (error) {
             console.error("Error updating roadmap:", error);
             this.loadingInitial = false;
