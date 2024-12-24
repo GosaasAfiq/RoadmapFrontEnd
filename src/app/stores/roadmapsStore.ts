@@ -26,6 +26,8 @@ export default class RoadmapStore {
 
     };
 
+    sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc' = 'createdAt'; 
+
     // Reset all filters to default state
     resetFilters = () => {
         this.page = 1;
@@ -56,12 +58,13 @@ export default class RoadmapStore {
         searchTerm?: string, 
         filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed'| 'near-due' | 'overdue'  = 'all',
         page: number = 1,
-        pageSize: number = 6
+        pageSize: number = 6,
+        sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc' = this.sortBy
     ) => {
         this.loadingInitial = true;
         try {
             // Expecting the updated response structure from agent.Roadmaps.list
-            const { totalCount, items, draftCount, notStartedCount, inProgressCount, completedCount,nearDueCount,overdueCount } = await agent.Roadmaps.list(searchTerm, filter, page, pageSize);
+            const { totalCount, items, draftCount, notStartedCount, inProgressCount, completedCount,nearDueCount,overdueCount } = await agent.Roadmaps.list(searchTerm, filter, page, pageSize,sortBy);
             const all = totalCount;
 
             runInAction(() => {
@@ -124,6 +127,10 @@ export default class RoadmapStore {
 
     setPageSize = (pageSize: number) => {
         this.pageSize = pageSize;
+    };
+
+    setSortBy = (sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc') => {
+        this.sortBy = sortBy;
     };
 
     setFilterAllZero = () => {

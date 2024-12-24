@@ -53,13 +53,15 @@ const Roadmaps = {
         searchTerm?: string, 
         filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed' | 'near-due' | 'overdue' = 'all', 
         page: number = 1, 
-        pageSize: number = 6
+        pageSize: number = 6,
+        sortBy: string = "createdAt"
     ) => {
         const params = new URLSearchParams();
         if (searchTerm) params.append('searchTerm', searchTerm);
         if (filter !== 'all') params.append('filter', filter); // Add the filter parameter if it's not 'all'
         params.append('page', page.toString());
         params.append('pageSize', pageSize.toString());
+        if (sortBy) params.append('sortBy', sortBy);
 
         // Update the response type to include totalCount and items
         return requests.get<{ totalCount: number; items: Roadmap[];

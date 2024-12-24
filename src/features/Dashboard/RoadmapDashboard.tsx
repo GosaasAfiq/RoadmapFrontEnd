@@ -21,6 +21,8 @@ export default observer(function RoadmapDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [pendingSearchTerm, setPendingSearchTerm] = useState(""); // Tracks input changes
     const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
+    const [sortBy, setSortBy] = useState<'name' | 'namedesc' | 'createdAt' |'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'>('createdAt');
+
 
     useEffect(() => {
         roadmapStore.setPage(1);
@@ -28,14 +30,14 @@ export default observer(function RoadmapDashboard() {
         roadmapStore.roadmaps = [];  // Clear the roadmaps state
 
         const debounceLoadRoadmaps = _.debounce(() => {
-            roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize);
+            roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize, sortBy);
         }, 500);
     
         debounceLoadRoadmaps();
     
         // Cleanup debounce on unmount
         return () => debounceLoadRoadmaps.cancel();
-    }, [searchTerm, filter, pageSize]);
+    }, [searchTerm, filter, pageSize,sortBy]);
     
     
 
@@ -58,8 +60,8 @@ export default observer(function RoadmapDashboard() {
                     searchTerm={pendingSearchTerm} // Tracks input
                     setSearchTerm={setPendingSearchTerm} // Updates input state
                     onSearch={() => setSearchTerm(pendingSearchTerm)} // Confirms search term
-
                 />
+                
 
                 {/* Filter Dropdown */}
                 <Filter 
@@ -77,25 +79,53 @@ export default observer(function RoadmapDashboard() {
             {/* Icons Section */}
             <div className="flex justify-between items-center mb-6">
 
-                {/* Left Section: Total Roadmaps */}
-                <div className="bg-gray-100 p-3 rounded-lg shadow-sm border border-gray-300">
-                    <span className="text-gray-800 font-medium text-base">
-                        Total Roadmaps: <span className="text-blue-600">{roadmapStore.totalCount}</span>
-                    </span>
+                {/* Total Roadmaps Section */}
+                <div className="flex justify-between items-center mb-6">
+
+                    {/* Sort By Dropdown */}
+                    <div className="flex items-center">
+                        <label htmlFor="sortBy" className="mr-2 text-gray-800 font-medium">Sort By:</label>
+                        <select
+                            id="sortBy"
+                            value={sortBy}
+                            onChange={(e) => {
+                                const newSortBy = e.target.value as 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt' | 'updatedAtdesc';
+                                setSortBy(newSortBy);
+                                roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize, newSortBy);
+                            }}
+                            className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
+                        >
+                            <option value="createdAt">Default</option>
+                            <option value="createdAtdesc">Created At (oldest)</option>
+                            <option value="name">Name (asc)</option>
+                            <option value="namedesc">Name (desc)</option>
+                            <option value="updatedAt">Updated At (latest)</option>
+                            <option value="updatedAtdesc">Updated At (oldest)</option>
+                        </select>
+                    </div>
+
+                    
+                    <div className="bg-gray-100 p-3 rounded-lg shadow-sm border border-gray-300 ml-4">
+                        <span className="text-gray-800 font-medium text-base">
+                            Total Roadmaps: <span className="text-blue-600">{roadmapStore.totalCount}</span>
+                        </span>
+                    </div>
+
                 </div>
+
+
+
 
                 {/* Right Section: Icons and Dropdown */}
                 <div className="flex items-center space-x-4">
 
                 <button
                     onClick={() => {
-                        // Reset filters in the store
                         roadmapStore.resetFilters();
-                        // Also reset the searchTerm and filter to default values
-                        setSearchTerm('');  // Assuming you have a search term state
-                        setFilter('all');   // Assuming you have a filter state
-                        // Reload the roadmaps with default values
-                        loadRoadmaps('', 'all', 1, 6);
+                        setSearchTerm(''); 
+                        setFilter('all');   
+                        setSortBy('createdAt');
+                        loadRoadmaps('', 'all', 1, 6, 'createdAt');
                     }}
                     className="ml-4 p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg"
                 >
@@ -143,13 +173,15 @@ export default observer(function RoadmapDashboard() {
                 <button
                     disabled={roadmapStore.page === 1}
                     onClick={() => {
-                        roadmapStore.setPage(roadmapStore.page - 1);
-                        roadmapStore.loadRoadmaps();
+                        const previousPage = roadmapStore.page - 1; // Define the previous page
+                        roadmapStore.setPage(previousPage); // Update the page to the previous page
+                        roadmapStore.loadRoadmaps(searchTerm, filter, previousPage, pageSize, sortBy); // Load roadmaps for the previous page
                     }}
                     className={`px-4 py-2 rounded-lg shadow ${roadmapStore.page === 1 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                 >
                     Previous
                 </button>
+
                 
                 {/* Page Number */}
                 <span>Page {roadmapStore.page}</span>
@@ -162,7 +194,7 @@ export default observer(function RoadmapDashboard() {
                     onClick={() => {
                         const nextPage = roadmapStore.page + 1;
                         roadmapStore.setPage(nextPage);
-                        roadmapStore.loadRoadmaps(searchTerm, filter, nextPage, roadmapStore.pageSize);
+                        roadmapStore.loadRoadmaps(searchTerm, filter, nextPage, roadmapStore.pageSize,sortBy);
                     }}
                     className={`px-4 py-2 rounded-lg shadow ${roadmapStore.page >= Math.ceil(roadmapStore.totalCount / roadmapStore.pageSize) ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'}`}
                 >
