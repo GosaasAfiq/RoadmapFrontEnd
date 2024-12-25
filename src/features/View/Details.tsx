@@ -190,6 +190,8 @@ export default observer(function Detail() {
 
         await updateNode(updatedRoadmap);
 
+        toast.success( "Node Updated!");
+
         loadRoadmap(selectedRoadmap.id); 
       }
       }

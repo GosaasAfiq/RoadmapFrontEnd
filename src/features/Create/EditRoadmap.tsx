@@ -288,6 +288,16 @@ export default observer(function CreateRoadmap() {
                 toast.error(`All details for milestone ${milestoneIndex + 1} must be filled.`);
                 return false;
             }
+
+            if (milestoneIndex > 0) {
+                const previousMilestone = milestones[milestoneIndex - 1];
+                if (new Date(milestone.startDate) < new Date(previousMilestone.endDate)) {
+                    toast.error(
+                        `The start date of milestone ${milestoneIndex + 1} cannot be earlier than the end date of milestone ${milestoneIndex}.`
+                    );
+                    return false;
+                }
+            }
     
             // If the milestone has sections, check if at least one section is filled
             if (milestone.sections.length > 0) {
@@ -324,7 +334,7 @@ export default observer(function CreateRoadmap() {
 
         console.log("Action:", action);
         
-        const isPublished = action === "publish"; // Check if the clicked button was "publish"
+        const isPublished = action === "publish"|| action === "update";
 
         if (isPublished && !validateRoadmap()) {
             // If validation fails, stop the submission
@@ -355,15 +365,39 @@ export default observer(function CreateRoadmap() {
                     if (isPublished) {
                         await updateRoadmap(dataToSend!);
 
-                        const auditTrailData = {
-                            userId: userId,  
-                            action: "Created a roadmap"
-                        };
+                        if (action === "publish")
+                        {
+                            toast.success( "Roadmap Created!");
 
-                        // await store.auditTrailStore.create(auditTrailData);
-                        navigate("/roadmaps");
+                            const auditTrailData = {
+                                userId: userId,  
+                                action: "Created a roadmap"
+                            };
+
+                            // await store.auditTrailStore.create(auditTrailData);
+                            navigate("/roadmaps");
+                        }
+                        else if (action === "update")
+                        {
+                            toast.success( "Roadmap Date Updated!");
+
+                            const auditTrailData = {
+                                userId: userId,  
+                                action: "Updated Roadmap Date"
+                            };
+
+                            if (!selectedRoadmap) {
+                                toast.error("No roadmap selected.");
+                                return;
+                            }
+
+                            // await store.auditTrailStore.create(auditTrailData);
+                            navigate(`/roadmaps/${selectedRoadmap.id}`);
+                        }
                     } else {
                         await updateRoadmap(dataToSend!);
+
+                        toast.success( "Draft Updated!");
 
                         const auditTrailData = {
                             userId: userId,  
@@ -374,9 +408,12 @@ export default observer(function CreateRoadmap() {
                         navigate("/roadmaps");
                     }
                 } 
-            } catch (error) {
-                console.error("Error submitting roadmap:", error);
-                toast.error("An error occurred while creating the roadmap.");
+            } catch (error: any) {
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.message || "An error occurred while updating the roadmap.");
+                } else {
+                    toast.error("An error occurred while updating the roadmap.");
+                }
             }
         
     };
@@ -481,7 +518,7 @@ export default observer(function CreateRoadmap() {
                             </NavLink>
                             <button 
                                 type="submit"
-                                onClick={() => setAction("publish")}
+                                onClick={() => setAction("update")}
                                 className="bg-green-500 text-white px-6 py-2 rounded-md shadow hover:bg-green-600">
                                     Update
                             </button>

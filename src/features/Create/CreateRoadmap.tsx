@@ -222,6 +222,16 @@ export default observer(function CreateRoadmap() {
                 toast.error(`All details for milestone ${milestoneIndex + 1} must be filled.`);
                 return false;
             }
+
+            if (milestoneIndex > 0) {
+                const previousMilestone = milestones[milestoneIndex - 1];
+                if (new Date(milestone.startDate) < new Date(previousMilestone.endDate)) {
+                    toast.error(
+                        `The start date of milestone ${milestoneIndex + 1} cannot be earlier than the end date of milestone ${milestoneIndex}.`
+                    );
+                    return false;
+                }
+            }
     
             // If the milestone has sections, check if at least one section is filled
             if (milestone.sections.length > 0) {
@@ -310,9 +320,12 @@ export default observer(function CreateRoadmap() {
                     // await store.auditTrailStore.create(auditTrailData);
                     navigate("/roadmaps");
                 } 
-            } catch (error) {
-                console.error("Error submitting roadmap:", error);
-                toast.error("An error occurred while creating the roadmap.");
+            } catch (error: any) {
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.message || "An error occurred while creating the roadmap.");
+                } else {
+                    toast.error("An error occurred while creating the roadmap.");
+                }
             }
         
     };

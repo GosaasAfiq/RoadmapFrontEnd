@@ -115,9 +115,12 @@ export default class RoadmapStore {
                 this.setFilterAllZero();
                 this.loadingInitial = false;
             });
+
+            return createdRoadmap; 
         } catch (error) {
             console.error("Error creating roadmap:", error);
             this.loadingInitial = false;
+            throw error;
         }
     }; 
 
@@ -190,7 +193,6 @@ export default class RoadmapStore {
                 this.loadingInitial = false;
             });
         } catch (error) {
-            console.error("Error marking roadmap as deleted:", error);
             this.loadingInitial = false;
             throw new Error("Failed to mark roadmap as deleted.");
         }
@@ -214,6 +216,7 @@ export default class RoadmapStore {
         } catch (error) {
             console.error("Error updating roadmap:", error);
             this.loadingInitial = false;
+            throw error;
         }
     };
     
