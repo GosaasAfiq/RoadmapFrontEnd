@@ -6,6 +6,7 @@ import { observer } from "mobx-react-lite";
 
 export default observer(function NavBar() {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { userStore,roadmapStore} = useStore();
     const navigate = useNavigate();
     const { user, loading } = useAuth();
@@ -14,6 +15,8 @@ export default observer(function NavBar() {
     const buttonRef = useRef<HTMLButtonElement | null>(null);
 
     const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+    const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+
 
     const handleClickOutside = (event: MouseEvent) => {
         if (
@@ -57,7 +60,7 @@ export default observer(function NavBar() {
         <nav className="bg-blue-600 shadow-lg sticky top-0 z-50"> {/* Sticky NavBar */}
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
                 {/* Left: Logo */}
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 hidden md:flex">
                     <a className="flex items-center space-x-3">
                         <img
                             src="/img/white-gosaas.png"
@@ -67,8 +70,33 @@ export default observer(function NavBar() {
                     </a>
                 </div>
 
+                {/* Mobile Menu Button */}
+                <button
+                    className="text-white md:hidden p-2 focus:outline-none focus:ring-2 focus:ring-white"
+                    onClick={toggleMobileMenu}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d={
+                                mobileMenuOpen
+                                    ? "M6 18L18 6M6 6l12 12" // Close icon
+                                    : "M4 6h16M4 12h16M4 18h16" // Hamburger icon
+                            }
+                        />
+                    </svg>
+                </button>
+
                 {/* Center: Create and View Roadmaps */}
-                <div className="flex items-center space-x-4 ml-auto mr-8">
+                <div className={`items-center space-x-4 ml-auto mr-8 hidden md:flex`}>
                     <button className="bg-white text-blue-600 font-semibold py-2 px-4 rounded hover:bg-blue-100 transition">
                         <NavLink to="create" className="block">Create Roadmap</NavLink>
                     </button>
@@ -78,7 +106,7 @@ export default observer(function NavBar() {
                 </div>
 
                 {/* Right: User Profile with Dropdown */}
-                <div className="relative flex items-center">
+                <div className={`relative items-center hidden md:flex`}>
                     <button
                         ref={buttonRef}
                         type="button"
@@ -126,6 +154,49 @@ export default observer(function NavBar() {
                     )}
                 </div>
             </div>
+
+            {/* Mobile Menu */}
+            {mobileMenuOpen && (
+                <div className="md:hidden bg-blue-600">
+                    <ul className="space-y-2 py-2 px-4">
+                        <li>
+                            <NavLink
+                                to="create"
+                                className="block text-white py-2 px-4 hover:bg-blue-700 rounded"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Create Roadmap
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink
+                                to="roadmaps"
+                                className="block text-white py-2 px-4 hover:bg-blue-700 rounded"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                View Roadmaps
+                            </NavLink>
+                        </li>
+                        <li>
+                            <NavLink
+                                to="audittrail"
+                                className="block text-white py-2 px-4 hover:bg-blue-700 rounded"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Audit Trail
+                            </NavLink>
+                        </li>
+                        <li>
+                            <button
+                                onClick={handleLogout}
+                                className="block w-full text-left text-white py-2 px-4 hover:bg-blue-700 rounded"
+                            >
+                                Log Out
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            )}
         </nav>
     );
 });

@@ -9,6 +9,7 @@ import Filter from "./Filter";
 import ListView from "./ListView";
 import TableView from "./TableView";
 import SearchBar from "./SearchBar";
+import { runInAction } from "mobx";
 
 
 export default observer(function RoadmapDashboard() { 
@@ -26,8 +27,10 @@ export default observer(function RoadmapDashboard() {
 
     useEffect(() => {
         roadmapStore.setPage(1);
-        roadmapStore.loadingInitial = true;
-        roadmapStore.roadmaps = [];  // Clear the roadmaps state
+        runInAction(() => {
+            roadmapStore.loadingInitial = true; // Set loading flag within an action
+            roadmapStore.roadmaps = []; // Clear roadmaps within an action
+        });
 
         const debounceLoadRoadmaps = _.debounce(() => {
             roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize, sortBy);
@@ -123,6 +126,7 @@ export default observer(function RoadmapDashboard() {
                     onClick={() => {
                         roadmapStore.resetFilters();
                         setSearchTerm(''); 
+                        setPendingSearchTerm('');  
                         setFilter('all');   
                         setSortBy('createdAt');
                         loadRoadmaps('', 'all', 1, 6, 'createdAt');
