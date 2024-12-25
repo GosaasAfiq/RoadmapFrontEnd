@@ -92,6 +92,7 @@ export default class AuditTrailStore {
         this.endDate = undefined;
         this.page = 1; // Current page
         this.pageSize= 6; // Number of items per page
+        this.loadAuditTrails();
     };
 
     setSearchTerm = (term: string) => {

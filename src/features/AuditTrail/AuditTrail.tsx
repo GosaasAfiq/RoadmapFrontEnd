@@ -30,6 +30,18 @@ export default observer(function AuditTrail() {
         auditTrailStore.loadAllUsers(); // Fetch all users for the dropdown
     }, [auditTrailStore]);
 
+    const handleClearFilters = () => {
+        // Reset local state (temporary filters)
+        setTempSearchTerm('');
+        setTempUserFilter('');
+        setTempStartDate(undefined);
+        setTempEndDate(undefined);
+        
+        // Call resetFilters in the store
+        auditTrailStore.resetFilters();
+    };
+    
+
 
     if (loadingInitial) return <LoadingComponent content="Loading..." />;
 
@@ -124,6 +136,12 @@ export default observer(function AuditTrail() {
 
                 {/* Apply Button */}
                 <div className="ml-auto flex items-center space-x-4">
+                    <button
+                        onClick={handleClearFilters}
+                        className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto"
+                    >
+                        Clear Filters
+                    </button>
                     <button
                         onClick={handleApplyFilters}
                         className="px-6 py-3 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:ring focus:ring-blue-300 w-full sm:w-auto"
