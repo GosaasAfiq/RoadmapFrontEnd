@@ -208,7 +208,6 @@ export default observer(function Detail() {
           id: roadmapId,
           isDeleted: true
       };
-      console.log(data);
 
       const auditTrailData = {
         userId: userId ?? "unknown", // Use a fallback value if userId is undefined

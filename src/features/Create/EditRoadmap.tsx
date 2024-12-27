@@ -27,7 +27,7 @@ export default observer(function CreateRoadmap() {
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [action, setAction] = useState<string | null>(null);
     const { userStore,roadmapStore } = useStore();  // Accessing the userStore from the global store
-    const {loadingInitial,createRoadmap,loadRoadmap,selectedRoadmap,updateRoadmap} = roadmapStore;
+    const {loadingInitial,loadRoadmap,selectedRoadmap,updateRoadmap} = roadmapStore;
     const navigate = useNavigate();
     const userId = userStore.user?.id; 
     const location = useLocation(); // Use useLocation to track the current path
@@ -45,15 +45,12 @@ export default observer(function CreateRoadmap() {
             isPublished = selectedRoadmap?.isPublished || false;
         }
     
-        const [isDataModified, setIsDataModified] = useState(false); 
-        console.log("datamodified:", isDataModified);
     
         const [comingBackFromPreview, setComingBackFromPreview] = useState(false);
     
     // UseEffect to handle changes from preview.tsx state
         useEffect(() => {
             if (location.state?.isDataModified !== undefined) {
-                setIsDataModified(location.state.isDataModified);  // Update local state when coming back from Preview
                 setComingBackFromPreview(true); // Flag that we are coming back from preview
             }
         }, [location.state]);
@@ -145,10 +142,7 @@ export default observer(function CreateRoadmap() {
             ...milestones,
             { id:"",name: "",parentId: "", startDate: "", endDate: "", createAt: "", description: "", sections: [] }, // Add description here
         ]);
-    };
-    
-    // console.log("Selected roadmap:", selectedRoadmap);
-    
+    };    
 
     // Function to handle input changes for milestone fields
     const handleMilestoneChange = (
@@ -331,8 +325,6 @@ export default observer(function CreateRoadmap() {
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); // Prevent form submission from refreshing the page
-
-        console.log("Action:", action);
         
         const isPublished = action === "publish"|| action === "update";
 
@@ -356,10 +348,7 @@ export default observer(function CreateRoadmap() {
                     createdAt: createdAt,
                     milestones: milestones,
                 },
-            }; 
-
-            console.log(dataToSend);
-            
+            };             
             try {
                 if (id) {
                     if (isPublished) {
@@ -464,10 +453,7 @@ export default observer(function CreateRoadmap() {
                                             createdAt: createdAt,
                                             milestones: milestones,
                                         },
-                                    };
-                            
-                                    console.log('Data being sent to create roadmap = ', JSON.stringify(dataToPreview, null, 2));
-                            
+                                    };                            
                                     navigate("/preview", { state: dataToPreview});
 
                                 }}

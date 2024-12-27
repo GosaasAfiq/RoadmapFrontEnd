@@ -75,7 +75,6 @@ export default class AuditTrailStore {
         this.loadingInitial = true;
         try {
             await agent.AuditTrails.create(auditTrailData);
-            console.log("Audit trail created successfully");
             this.loadingInitial = false;
         } catch (error) {
             console.error("Failed to create audit trail:", error);

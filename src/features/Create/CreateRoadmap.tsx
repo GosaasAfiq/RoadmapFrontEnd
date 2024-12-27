@@ -26,7 +26,7 @@ export default observer(function CreateRoadmap() {
     const [milestones, setMilestones] = useState<Milestone[]>([]);
     const [action, setAction] = useState<string | null>(null);
     const { userStore,roadmapStore } = useStore();  // Accessing the userStore from the global store
-    const {loadingInitial,createRoadmap,loadRoadmap,selectedRoadmap,updateRoadmap} = roadmapStore;
+    const {loadingInitial,createRoadmap,loadRoadmap} = roadmapStore;
     const navigate = useNavigate();
     const userId = userStore.user?.id; 
     const location = useLocation(); // Use useLocation to track the current path
@@ -80,9 +80,7 @@ export default observer(function CreateRoadmap() {
             { id:"",name: "",parentId: "", startDate: "", endDate: "", createAt: "", description: "", sections: [] }, // Add description here
         ]);
     };
-    
-    // console.log("Selected roadmap:", selectedRoadmap);
-    
+        
 
     // Function to handle input changes for milestone fields
     const handleMilestoneChange = (
@@ -265,8 +263,6 @@ export default observer(function CreateRoadmap() {
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); // Prevent form submission from refreshing the page
-
-        console.log("Action:", action);
         
         const isPublished = action === "publish"; // Check if the clicked button was "publish"
 
@@ -291,8 +287,6 @@ export default observer(function CreateRoadmap() {
                     milestones: milestones,
                 },
             }; 
-
-            console.log(dataToSend);
             
             try {
                 if (isPublished) {                        
@@ -377,9 +371,7 @@ export default observer(function CreateRoadmap() {
                                         },
                                         isDataModified,
                                     };
-                            
-                                    console.log('Data being sent to create roadmap = ', JSON.stringify(dataToPreview, null, 2));
-                            
+                                                        
                                     navigate("/preview", { state: dataToPreview});
 
                                 }}

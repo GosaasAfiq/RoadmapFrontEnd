@@ -60,7 +60,7 @@ export default observer(function NavBar() {
         <nav className="bg-blue-600 shadow-lg sticky top-0 z-50"> {/* Sticky NavBar */}
             <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
                 {/* Left: Logo */}
-                <div className="flex items-center space-x-3 hidden md:flex">
+                <div className="items-center space-x-3 hidden md:flex">
                     <a className="flex items-center space-x-3">
                         <img
                             src="/img/white-gosaas.png"
