@@ -22,7 +22,8 @@ export default observer(function RoadmapDashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [pendingSearchTerm, setPendingSearchTerm] = useState(""); // Tracks input changes
     const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
-    const [sortBy, setSortBy] = useState<'name' | 'namedesc' | 'createdAt' |'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'>('createdAt');
+    const [sortBy, setSortBy] = useState<'name' | 'namedesc' | 'createdAt' |'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|
+                                        'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc'>('updatedAt');
 
 
     useEffect(() => {
@@ -31,7 +32,7 @@ export default observer(function RoadmapDashboard() {
             roadmapStore.loadingInitial = true; // Set loading flag within an action
             roadmapStore.roadmaps = []; // Clear roadmaps within an action
         });
-
+ 
         const debounceLoadRoadmaps = _.debounce(() => {
             roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize, sortBy);
         }, 500);
@@ -92,18 +93,24 @@ export default observer(function RoadmapDashboard() {
                             id="sortBy"
                             value={sortBy}
                             onChange={(e) => {
-                                const newSortBy = e.target.value as 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt' | 'updatedAtdesc';
+                                const newSortBy = e.target.value as 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt' | 'updatedAtdesc'|'progress'|'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc';
                                 setSortBy(newSortBy);
                                 roadmapStore.loadRoadmaps(searchTerm, filter, roadmapStore.page, pageSize, newSortBy);
                             }}
                             className="p-2 border border-gray-300 rounded-lg shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
                         >
-                            <option value="createdAt">Default</option>
+                            <option value="updatedAt">Default</option>
+                            <option value="updatedAtdesc">Updated At (oldest)</option>
+                            <option value="createdAt">Created At (latest)</option>
                             <option value="createdAtdesc">Created At (oldest)</option>
                             <option value="name">Name (asc)</option>
                             <option value="namedesc">Name (desc)</option>
-                            <option value="updatedAt">Updated At (latest)</option>
-                            <option value="updatedAtdesc">Updated At (oldest)</option>
+                            <option value="progress">Progress (asc)</option>
+                            <option value="progressdesc">Progress (desc)</option>
+                            <option value="startdate">Start Date (asc)</option>
+                            <option value="startdatedesc">Start Date (desc)</option>
+                            <option value="enddate">End Date (asc)</option>
+                            <option value="enddatedesc">End Date (desc)</option>
                         </select>
                     </div>
 
@@ -128,8 +135,8 @@ export default observer(function RoadmapDashboard() {
                         setSearchTerm(''); 
                         setPendingSearchTerm('');  
                         setFilter('all');   
-                        setSortBy('createdAt');
-                        loadRoadmaps('', 'all', 1, 6, 'createdAt');
+                        setSortBy('updatedAt');
+                        loadRoadmaps('', 'all', 1, 6, 'updatedAt');
                     }}
                     className="ml-4 p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-lg"
                 >

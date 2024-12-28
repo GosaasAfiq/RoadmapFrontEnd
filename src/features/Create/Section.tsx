@@ -326,6 +326,7 @@ export default function Section({
                             className="w-full p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             rows={6}
                             placeholder="Enter description here"
+                            maxLength={400}
                         />
                         <div className="mt-4 flex justify-end gap-4">
                             <button

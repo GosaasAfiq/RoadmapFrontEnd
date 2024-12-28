@@ -324,7 +324,12 @@ export default observer(function CreateRoadmap() {
     };
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); // Prevent form submission from refreshing the page
+        e.preventDefault(); 
+
+        if (!roadmapName.trim()) {
+            toast.error("Roadmap name is required.");
+            return; 
+        }
         
         const isPublished = action === "publish"|| action === "update";
 
@@ -363,7 +368,7 @@ export default observer(function CreateRoadmap() {
                                 action: "Created a roadmap"
                             };
 
-                            await store.auditTrailStore.create(auditTrailData);
+                            // await store.auditTrailStore.create(auditTrailData);
                             navigate("/roadmaps");
                         }
                         else if (action === "update")
@@ -380,7 +385,7 @@ export default observer(function CreateRoadmap() {
                                 return;
                             }
 
-                            await store.auditTrailStore.create(auditTrailData);
+                            // await store.auditTrailStore.create(auditTrailData);
                             navigate(`/roadmaps/${selectedRoadmap.id}`);
                         }
                     } else {
@@ -393,7 +398,7 @@ export default observer(function CreateRoadmap() {
                             action: "Updated a draft"
                         };
 
-                        await store.auditTrailStore.create(auditTrailData);
+                        // await store.auditTrailStore.create(auditTrailData);
                         navigate("/roadmaps");
                     }
                 } 
@@ -433,6 +438,7 @@ export default observer(function CreateRoadmap() {
                                 className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                                 disabled={isPublished}  
                                 maxLength={40}
+                                required
                             />
                         </div>
 

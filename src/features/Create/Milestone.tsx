@@ -178,6 +178,7 @@ export default function Milestone({
                             className="w-full p-4 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                             rows={6}
                             placeholder="Enter description here"
+                            maxLength={400}
                         />
                         <div className="mt-4 flex justify-end gap-4">
                             <button type="button" onClick={closeDescriptionModal} className="bg-gray-500 text-white px-6 py-2 rounded-md shadow hover:bg-gray-600">Close</button>

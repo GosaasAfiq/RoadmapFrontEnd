@@ -26,7 +26,7 @@ export default class RoadmapStore {
 
     };
 
-    sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc' = 'createdAt'; 
+    sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc' = 'updatedAt'; 
 
     // Reset all filters to default state
     resetFilters = () => {
@@ -59,7 +59,7 @@ export default class RoadmapStore {
         filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed'| 'near-due' | 'overdue'  = 'all',
         page: number = 1,
         pageSize: number = 6,
-        sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc' = this.sortBy
+        sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc'  = this.sortBy
     ) => {
         this.loadingInitial = true;
         try {
@@ -132,7 +132,7 @@ export default class RoadmapStore {
         this.pageSize = pageSize;
     };
 
-    setSortBy = (sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc') => {
+    setSortBy = (sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc' ) => {
         this.sortBy = sortBy;
     };
 
@@ -152,7 +152,7 @@ export default class RoadmapStore {
                 const index = this.roadmaps.findIndex((roadmap) => roadmap.id === updatedRoadmap.id);
                 if (index > -1) {
                     this.roadmaps[index] = updatedRoadmap;
-                }
+                } 
 
                 // Update the selected roadmap if it matches the updated one
                 if (this.selectedRoadmap?.id === updatedRoadmap.id) {

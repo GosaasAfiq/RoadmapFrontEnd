@@ -186,7 +186,7 @@ export default observer(function Detail() {
           action: "Marked node as complete"
       };
     
-      await store.auditTrailStore.create(auditTrailData);
+      // await store.auditTrailStore.create(auditTrailData);
 
         await updateNode(updatedRoadmap);
 
@@ -214,7 +214,7 @@ export default observer(function Detail() {
         action: "Deleted a roadmap"
     };
 
-    await store.auditTrailStore.create(auditTrailData);
+    // await store.auditTrailStore.create(auditTrailData);
 
       // Send the data to the store to handle the delete logic
       await roadmapStore.deleteRoadmap(data);
