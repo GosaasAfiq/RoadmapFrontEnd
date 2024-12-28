@@ -59,7 +59,7 @@ export default observer(function Detail() {
 
       const traverseNodes = (node: any, parentId: string | null = null) => {
         const isCompleted = node.isCompleted;
-        const nodeColor = isCompleted ? "#4caf50" : "";
+        const nodeColor = isCompleted ? "#4caf50" : "#ffffff";
 
         roadmapNodes.push({
           id: node.id.toString(),
@@ -127,6 +127,9 @@ export default observer(function Detail() {
                   const updatedChild = {
                     ...node,
                     data: { ...node.data, isCompleted },
+                    style: {
+                      backgroundColor: isCompleted ? "#ffeb3b" : "#ffffff", // Yellow for temporary completion
+                    },
                   };
                   updateChildren(node.id, isCompleted); // Recursive call for child nodes
                   return updatedChild;
@@ -137,7 +140,16 @@ export default observer(function Detail() {
           };
   
           setNodes((prevNodes) =>
-            prevNodes.map((node) => (node.id === updatedNode.id ? updatedNode : node))
+            prevNodes.map((node) =>
+              node.id === updatedNode.id
+                ? {
+                    ...updatedNode,
+                    style: {
+                      backgroundColor: updatedNode.data.isCompleted ? "#ffeb3b" : "#ffffff", // Yellow for temporary completion
+                    },
+                  }
+                : node
+            )
           );
   
           if (updatedNode.data.isCompleted) {
