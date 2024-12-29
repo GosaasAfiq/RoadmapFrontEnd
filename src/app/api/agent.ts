@@ -75,16 +75,19 @@ const Roadmaps = {
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
     create: (data: CreateRoadmapData) => {
+        console.log('CreateRoadmapData:', JSON.stringify(data, null, 2)); 
         return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
     },
     updatenode: (data:Roadmap) => {
         const wrappedRoadmap =  { roadmap: data };
+        console.log('UpdateRoadmapData:', JSON.stringify(wrappedRoadmap, null, 2)); 
         return requests.put<Roadmap>('/roadmaps/updatenode',wrappedRoadmap);
     },
     deleteRoadmap: (data: { id: string, isDeleted: boolean }) => {
         return requests.put<Roadmap>('/roadmaps/deleteroadmap', data);  // Send id and isDeleted flag
     },
     updateRoadmap: (data: CreateRoadmapData) => {
+        console.log('UpdateRoadmapData:', JSON.stringify(data, null, 2)); 
         return requests.post<Roadmap>('/roadmaps/updateroadmap', data);  // Send the nested roadmap object
     },
 };

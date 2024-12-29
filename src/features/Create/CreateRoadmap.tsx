@@ -7,6 +7,8 @@ import { SubSection } from "../../app/models/create/SubSection";
 import Milestone from "./Milestone";
 import { NavLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { validateRoadmap } from "./ValidateRoadmap";
+
 
 interface Milestone {
     id:string;
@@ -197,82 +199,13 @@ export default observer(function CreateRoadmap() {
         updatedMilestones[milestoneIndex].sections = updatedMilestones[milestoneIndex].sections.filter((_, i) => i !== sectionIndex);
         setMilestones(updatedMilestones);
     };
-
-    const validateRoadmap = (): boolean => {
-        // Check if the roadmap name is filled
-        if (!roadmapName.trim()) {
-            toast.error("Roadmap name is required.");
-            return false;
-        }
-    
-        // Check if there is at least one milestone
-        if (milestones.length === 0) {
-            toast.error("At least one milestone is required.");
-            return false;
-        }
-    
-        let hasSection = false; // To track if at least one section is filled in any milestone
-    
-        // Validate each milestone
-        for (const [milestoneIndex, milestone] of milestones.entries()) {
-            // Validate the milestone itself (all fields must be filled)
-            if (!milestone.name.trim() || !milestone.startDate.trim() || !milestone.endDate.trim() || !milestone.description.trim()) {
-                toast.error(`All details for milestone ${milestoneIndex + 1} must be filled.`);
-                return false;
-            }
-
-            if (milestoneIndex > 0) {
-                const previousMilestone = milestones[milestoneIndex - 1];
-                if (new Date(milestone.startDate) < new Date(previousMilestone.endDate)) {
-                    toast.error(
-                        `The start date of milestone ${milestoneIndex + 1} cannot be earlier than the end date of milestone ${milestoneIndex}.`
-                    );
-                    return false;
-                }
-            }
-    
-            // If the milestone has sections, check if at least one section is filled
-            if (milestone.sections.length > 0) {
-                hasSection = true; // Mark that we have at least one section
-                // Validate sections
-                for (const [sectionIndex, section] of milestone.sections.entries()) {
-                    if (!section.name.trim() || !section.startDate.trim() || !section.endDate.trim() || !section.description.trim()) {
-                        toast.error(`All details for section ${sectionIndex + 1} in milestone ${milestoneIndex + 1} must be filled.`);
-                        return false;
-                    }
-    
-                    // Validate subsections if they exist
-                    for (const [subSectionIndex, subSection] of section.subSections.entries()) {
-                        if (!subSection.name.trim() || !subSection.startDate.trim() || !subSection.endDate.trim() || !subSection.description.trim()) {
-                            toast.error(`All details for subsection ${subSectionIndex + 1} in section ${sectionIndex + 1} of milestone ${milestoneIndex + 1} must be filled.`);
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    
-        // Now check if there is at least one section across all milestones
-        if (!hasSection) {
-            toast.error("At least one section must be added to any milestone.");
-            return false;
-        }
-    
-        return true; // Validation passed
-    };
     
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); 
-
-        if (!roadmapName.trim()) {
-            toast.error("Roadmap name is required.");
-            return; 
-        }
         
         const isPublished = action === "publish"; // Check if the clicked button was "publish"
 
-        if (isPublished && !validateRoadmap()) {
-            // If validation fails, stop the submission
+        if (!validateRoadmap(isPublished, roadmapName, milestones)) {
             return;
         }
 
