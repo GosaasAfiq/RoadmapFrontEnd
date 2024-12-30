@@ -44,7 +44,7 @@ export const useGoogleAuth = () => {
                 action: "User logged in"
             };
 
-            // await store.auditTrailStore.create(auditTrailData);
+            await store.auditTrailStore.create(auditTrailData);
 
             
 

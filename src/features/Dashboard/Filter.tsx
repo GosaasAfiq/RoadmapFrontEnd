@@ -2,18 +2,19 @@ import { FC, useState, useEffect, useRef } from "react";
 import _ from "lodash"; // Import lodash for debounce
 
 interface FilterProps {
-  filter: "all" | "draft" | "not-started" | "in-progress" | "completed" | 'near-due' | 'overdue'; // Include new filters
-  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue'>>;
+  filter: "all" | "draft" |"publish" | "not-started" | "in-progress" | "completed" | 'near-due' | 'overdue'; // Include new filters
+  setFilter: React.Dispatch<React.SetStateAction<"all" | "draft" |"publish" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue'>>;
   filterCounts: { 
     all: number; 
-    draft: number; 
+    draft: number;
+    publish: number; 
     "not-started": number; 
     "in-progress": number; 
     completed: number; 
     'near-due': number;  
     'overdue':number;
   };
-  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue',page: number,pageSize: number) => void; // Update filter type
+  loadRoadmaps: (searchTerm: string, filter: "all" | "draft" |"publish" | "not-started" | "in-progress" | "completed"| 'near-due' | 'overdue',page: number,pageSize: number) => void; // Update filter type
   searchTerm: string;
   pageSize: number;
 }
@@ -23,7 +24,7 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts }) => {
   const dropdownRef = useRef<HTMLDivElement>(null); // Reference for dropdown 
 
   // Debounced filter change handler
-  const handleFilterChange = (newFilter: "all" | "draft" | "not-started"| "in-progress" | "completed"| 'near-due' | 'overdue') => {
+  const handleFilterChange = (newFilter: "all" | "draft" |"publish" | "not-started"| "in-progress" | "completed"| 'near-due' | 'overdue') => {
     setFilter(newFilter); 
   }; // Adjust debounce delay as needed
 
@@ -47,6 +48,7 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts }) => {
         <span>
           {filter === "all" && `All (${filterCounts.all})`}
           {filter === "draft" && `Draft (${filterCounts.draft})`}
+          {filter === "publish" && `Publish (${filterCounts.publish})`}
           {filter === "not-started" && `Not Started (${filterCounts["not-started"]})`}
           {filter === "in-progress" && `In Progress (${filterCounts["in-progress"]})`}
           {filter === "completed" && `Completed (${filterCounts.completed})`}
@@ -81,6 +83,13 @@ const Filter: FC<FilterProps> = ({ filter, setFilter, filterCounts }) => {
           >
             <span>Draft</span>
             <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts.draft}</span>
+          </div>
+          <div
+            className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+            onClick={() => handleFilterChange("publish")}
+          >
+            <span>Publish</span>
+            <span className="ml-auto text-sm font-medium text-gray-500">{filterCounts.publish}</span>
           </div>
           <div
             className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"

@@ -237,7 +237,7 @@ export default observer(function CreateRoadmap() {
                         action: "Created a roadmap"
                     };
 
-                    // await store.auditTrailStore.create(auditTrailData);
+                    await store.auditTrailStore.create(auditTrailData);
                     navigate("/roadmaps");
                 } else {                        
                     await createRoadmap(dataToSend!);
@@ -249,7 +249,7 @@ export default observer(function CreateRoadmap() {
                         action: "Created a draft"
                     };
 
-                    // await store.auditTrailStore.create(auditTrailData);
+                    await store.auditTrailStore.create(auditTrailData);
                     navigate("/roadmaps");
                 } 
             } catch (error: any) {

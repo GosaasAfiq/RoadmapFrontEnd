@@ -21,7 +21,7 @@ export default observer(function RoadmapDashboard() {
     const [isListView, setIsListView] = useState(initialView === 'table');
     const [searchTerm, setSearchTerm] = useState('');
     const [pendingSearchTerm, setPendingSearchTerm] = useState(""); // Tracks input changes
-    const [filter, setFilter] = useState<"all" | "draft" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
+    const [filter, setFilter] = useState<"all" | "draft" |"publish" | "not-started"| "in-progress" | "completed" | "near-due" | "overdue">("all");
     const [sortBy, setSortBy] = useState<'name' | 'namedesc' | 'createdAt' |'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|
                                         'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc'>('updatedAt');
 

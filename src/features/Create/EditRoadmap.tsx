@@ -306,7 +306,7 @@ export default observer(function CreateRoadmap() {
                                 action: "Created a roadmap"
                             };
 
-                            // await store.auditTrailStore.create(auditTrailData);
+                            await store.auditTrailStore.create(auditTrailData);
                             navigate("/roadmaps");
                         }
                         else if (action === "update")
@@ -323,7 +323,7 @@ export default observer(function CreateRoadmap() {
                                 return;
                             }
 
-                            // await store.auditTrailStore.create(auditTrailData);
+                            await store.auditTrailStore.create(auditTrailData);
                             navigate(`/roadmaps/${selectedRoadmap.id}`);
                         }
                     } else {
@@ -336,7 +336,7 @@ export default observer(function CreateRoadmap() {
                             action: "Updated a draft"
                         };
 
-                        // await store.auditTrailStore.create(auditTrailData);
+                        await store.auditTrailStore.create(auditTrailData);
                         navigate("/roadmaps");
                     }
                 } 

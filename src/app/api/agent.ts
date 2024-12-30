@@ -50,7 +50,7 @@ const requests = {
 const Roadmaps = {
     list: (
         searchTerm?: string, 
-        filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed' | 'near-due' | 'overdue' = 'all', 
+        filter: 'all' | 'draft' |'publish' | 'not-started' | 'in-progress' | 'completed' | 'near-due' | 'overdue' = 'all', 
         page: number = 1, 
         pageSize: number = 6,
         sortBy: string = "createdAt"
@@ -65,6 +65,7 @@ const Roadmaps = {
         // Update the response type to include totalCount and items
         return requests.get<{ totalCount: number; items: Roadmap[];
             draftCount: number;
+            publishCount: number;
             notStartedCount: number;
             inProgressCount: number;
             completedCount: number; 
@@ -75,19 +76,16 @@ const Roadmaps = {
     details: (id: string) =>
         requests.get<Roadmap>(`/roadmaps/${id}`),
     create: (data: CreateRoadmapData) => {
-        console.log('CreateRoadmapData:', JSON.stringify(data, null, 2)); 
         return requests.post<Roadmap>('/roadmaps', data);  // Send the nested roadmap object
     },
     updatenode: (data:Roadmap) => {
         const wrappedRoadmap =  { roadmap: data };
-        console.log('UpdateRoadmapData:', JSON.stringify(wrappedRoadmap, null, 2)); 
         return requests.put<Roadmap>('/roadmaps/updatenode',wrappedRoadmap);
     },
     deleteRoadmap: (data: { id: string, isDeleted: boolean }) => {
         return requests.put<Roadmap>('/roadmaps/deleteroadmap', data);  // Send id and isDeleted flag
     },
     updateRoadmap: (data: CreateRoadmapData) => {
-        console.log('UpdateRoadmapData:', JSON.stringify(data, null, 2)); 
         return requests.post<Roadmap>('/roadmaps/updateroadmap', data);  // Send the nested roadmap object
     },
 };

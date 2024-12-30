@@ -9,15 +9,16 @@ export default class RoadmapStore {
     selectedRoadmap: Roadmap | null = null;
     loading = false;
     loadingInitial = false;
-    totalFilterCounts = { all: 0, draft: 0, "not-started": 0, "in-progress" : 0, "completed" : 0, "near-due" : 0, "overdue" : 0}; // Consistent counts
+    totalFilterCounts = { all: 0, draft: 0, publish: 0, "not-started": 0, "in-progress" : 0, "completed" : 0, "near-due" : 0, "overdue" : 0}; // Consistent counts
 
     page: number = 1; // Current page
     pageSize: number = 6; // Number of items per page
     totalCount: number = 0; 
 
-    filterCounts: { all: number; draft: number; "not-started": number;"in-progress": number; completed: number; "near-due": number; "overdue" : number } = {
+    filterCounts: { all: number; draft: number; publish: number; "not-started": number;"in-progress": number; completed: number; "near-due": number; "overdue" : number } = {
         all: 0,
         draft: 0,
+        publish: 0,
         "not-started": 0,
         "in-progress": 0, 
         completed: 0,
@@ -35,6 +36,7 @@ export default class RoadmapStore {
         this.filterCounts = {
             all: 0,
             draft: 0,
+            publish: 0,
             "not-started": 0,
             "in-progress": 0,
             completed: 0,
@@ -56,7 +58,7 @@ export default class RoadmapStore {
  
     loadRoadmaps = async (
         searchTerm?: string, 
-        filter: 'all' | 'draft' | 'not-started' | 'in-progress' | 'completed'| 'near-due' | 'overdue'  = 'all',
+        filter: 'all' | 'draft' |'publish' | 'not-started' | 'in-progress' | 'completed'| 'near-due' | 'overdue'  = 'all',
         page: number = 1,
         pageSize: number = 6,
         sortBy: 'name' | 'namedesc' | 'createdAt' | 'createdAtdesc' | 'updatedAt'| 'updatedAtdesc'|'progress'|'progressdesc'|'startdate'|'startdatedesc'|'enddate'|'enddatedesc'  = this.sortBy
@@ -64,7 +66,7 @@ export default class RoadmapStore {
         this.loadingInitial = true;
         try {
             // Expecting the updated response structure from agent.Roadmaps.list
-            const { totalCount, items, draftCount, notStartedCount, inProgressCount, completedCount,nearDueCount,overdueCount } = await agent.Roadmaps.list(searchTerm, filter, page, pageSize,sortBy);
+            const { totalCount, items, draftCount,publishCount, notStartedCount, inProgressCount, completedCount,nearDueCount,overdueCount } = await agent.Roadmaps.list(searchTerm, filter, page, pageSize,sortBy);
             const all = totalCount;
 
             runInAction(() => {
@@ -73,6 +75,7 @@ export default class RoadmapStore {
                 if (this.filterCounts.all === 0) {
                     this.filterCounts.all = all; // Set the total count for all roadmaps only once
                     this.filterCounts.draft = draftCount;
+                    this.filterCounts.publish = publishCount;
                     this.filterCounts["not-started"] = notStartedCount;
                     this.filterCounts["in-progress"] = inProgressCount;
                     this.filterCounts.completed = completedCount;
